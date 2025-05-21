@@ -11,13 +11,15 @@ public class SignupMenuView {
     private final Table table;
     public final Label usernameLabel, passwordLabel;
     public final TextField usernameField, passwordField;
-    public final TextButton signupButton, guestButton;
+    public final TextButton signupButton, guestButton, loginMenuBtn;
 
 
     public SignupMenuView(Skin skin) {
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
 
+        float width = stage.getViewport().getScreenWidth();
+        float height = stage.getViewport().getScreenHeight();
 
         table = new Table();
         table.setFillParent(true);
@@ -51,14 +53,25 @@ public class SignupMenuView {
         table.row();
 
         //Buttons
-        signupButton = new TextButton("Sign Up", skin);
+        signupButton = new TextButton("Signup", skin);
         guestButton = new TextButton("Play as Guest", skin);
+        loginMenuBtn = new TextButton("Go to login menu",skin);
+        float labelScale = 0.9f;
+        signupButton.getLabel().setFontScale(labelScale);
+        guestButton.getLabel().setFontScale(labelScale);
+        loginMenuBtn.getLabel().setFontScale(labelScale);
+        signupButton.pad(8, 12, 8, 12);
+        guestButton.pad(8, 12, 8, 12);
+        loginMenuBtn.pad(8, 12, 8, 12);
+
         Table buttonTable = new Table();
-        buttonTable.pack();
-        buttonTable.setWidth(300);
-        buttonTable.add(signupButton).pad(10);
-        buttonTable.add(guestButton).pad(10);
-        table.add(buttonTable).colspan(2).padTop(20).width(300).center();
+        buttonTable.defaults().pad(10).height(75).width(400);
+        buttonTable.add(signupButton);
+        buttonTable.row();
+        buttonTable.add(guestButton);
+        buttonTable.row();
+        buttonTable.add(loginMenuBtn);
+        table.add(buttonTable).colspan(2).padTop(20).center();
     }
 
     public void resize(int width, int height) {

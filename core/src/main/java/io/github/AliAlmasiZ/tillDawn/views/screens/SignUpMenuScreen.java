@@ -3,6 +3,8 @@ package io.github.AliAlmasiZ.tillDawn.views.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import io.github.AliAlmasiZ.tillDawn.Main;
 import io.github.AliAlmasiZ.tillDawn.models.GameAssetManager;
 import io.github.AliAlmasiZ.tillDawn.views.SignupMenuView;
@@ -14,6 +16,27 @@ public class SignUpMenuScreen implements Screen {
     public SignUpMenuScreen(Main main) {
         this.main = main;
         this.view = new SignupMenuView(GameAssetManager.getGameAssetManager().pixthulhuui);
+
+        view.loginMenuBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                main.setScreen(new LoginMenuScreen(main));
+            }
+        });
+
+        view.signupButton.addListener(new ClickListener(){
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                //TODO
+            }
+        });
+
+        view.guestButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                //TODO
+            }
+        });
     }
 
     @Override

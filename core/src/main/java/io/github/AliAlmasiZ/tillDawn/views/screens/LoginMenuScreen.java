@@ -1,7 +1,12 @@
 package io.github.AliAlmasiZ.tillDawn.views.screens;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import io.github.AliAlmasiZ.tillDawn.Main;
+import io.github.AliAlmasiZ.tillDawn.models.GameAssetManager;
 import io.github.AliAlmasiZ.tillDawn.views.LoginMenuView;
 
 public class LoginMenuScreen implements Screen {
@@ -9,8 +14,22 @@ public class LoginMenuScreen implements Screen {
     private final LoginMenuView view;
 
     public LoginMenuScreen(Main main) {
-        this.view = new LoginMenuView();
+        this.view = new LoginMenuView(GameAssetManager.getGameAssetManager().pixthulhuui);
         this.main = main;
+
+        view.loginButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                //TODO
+            }
+        });
+
+        view.backButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                main.setScreen(new SignUpMenuScreen(main));
+            }
+        });
     }
 
     @Override
@@ -20,12 +39,14 @@ public class LoginMenuScreen implements Screen {
 
     @Override
     public void render(float v) {
-
+        Gdx.gl.glClearColor(0,0,0,1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+        view.render(v);
     }
 
     @Override
     public void resize(int i, int i1) {
-
+        view.resize(i, i1);
     }
 
     @Override
