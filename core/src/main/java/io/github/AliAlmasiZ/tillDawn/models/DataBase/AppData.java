@@ -7,6 +7,7 @@ import java.util.List;
 
 public class AppData {
     private static AppData appData;
+    public Player activePlayer;
 
     private List<Player> allPlayers;
 
@@ -20,7 +21,11 @@ public class AppData {
         return appData;
     }
 
+    public Player getActivePlayer() {
+        return activePlayer;
+    }
 
-
-
+    public void setActivePlayer(Player activePlayer) {
+        this.activePlayer = activePlayer;
+    }
 }

@@ -17,17 +17,10 @@ public class MainMenuScreen  implements Screen {
         this.main = main;
         this.view = new MainMenuView(GameAssetManager.getGameAssetManager().pixthulhuui);
 
-        view.loginButton.addListener(new ClickListener() {
+        view.profileBtn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                main.setScreen(new LoginMenuScreen(main));
-            }
-        });
-
-        view.signupButton.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                main.setScreen(new SignUpMenuScreen(main));
+                main.setScreen(new ProfileMenuScreen(main));
             }
         });
     }
@@ -40,15 +33,16 @@ public class MainMenuScreen  implements Screen {
     }
 
     @Override
+    public void resize(int i, int i1) {
+        view.resize(i, i1);
+    }
+
+    @Override
     public void show() {
 
     }
 
 
-    @Override
-    public void resize(int i, int i1) {
-
-    }
 
     @Override
     public void pause() {

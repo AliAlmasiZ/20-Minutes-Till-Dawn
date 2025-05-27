@@ -6,21 +6,28 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import io.github.AliAlmasiZ.tillDawn.Main;
+import io.github.AliAlmasiZ.tillDawn.controllers.LoginMenuController;
 import io.github.AliAlmasiZ.tillDawn.models.GameAssetManager;
+import io.github.AliAlmasiZ.tillDawn.models.Result;
 import io.github.AliAlmasiZ.tillDawn.views.LoginMenuView;
 
 public class LoginMenuScreen implements Screen {
     private final Main main;
     private final LoginMenuView view;
+    private final LoginMenuController controller;
 
     public LoginMenuScreen(Main main) {
+        this.controller = new LoginMenuController();
         this.view = new LoginMenuView(GameAssetManager.getGameAssetManager().pixthulhuui);
         this.main = main;
 
         view.loginButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                //TODO
+                Result result = controller.login(view.usernameField.getText(), view.passwordField.getText());
+                if(!result.isSuccessful()) {
+
+                }
             }
         });
 

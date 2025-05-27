@@ -1,4 +1,4 @@
 CREATE TABLE IF NOT EXISTS player (
   username  TEXT    PRIMARY KEY,
-  password  TEXT    NOT NULL,
+  password  TEXT    NOT NULL
 );

@@ -11,6 +11,7 @@ import io.github.AliAlmasiZ.tillDawn.controllers.MainMenuController;
 import io.github.AliAlmasiZ.tillDawn.models.GameAssetManager;
 import io.github.AliAlmasiZ.tillDawn.views.MainMenuView;
 import io.github.AliAlmasiZ.tillDawn.views.screens.MainMenuScreen;
+import io.github.AliAlmasiZ.tillDawn.views.screens.SignUpMenuScreen;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends Game {
@@ -18,8 +19,7 @@ public class Main extends Game {
 
     @Override
     public void create() {
-        setScreen(new MainMenuScreen(this));
-
+        setScreen(new SignUpMenuScreen(this));
     }
 
     @Override
