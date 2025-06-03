@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import io.github.AliAlmasiZ.tillDawn.models.GameAssetManager;
 import io.github.AliAlmasiZ.tillDawn.models.Player;
 
@@ -18,7 +19,7 @@ public class PlayerView {
     }
 
     public void update(Player player, float delta) {
-        Animation<Texture> currentAnim = player.isMoving() ?
+        Animation<TextureRegion> currentAnim = player.isMoving() ?
             assets.characterRunAnim : assets.characterIdleAnim;
 
         currentFrame.setRegion(currentAnim.getKeyFrame(player.getStateTime()));

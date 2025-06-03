@@ -11,6 +11,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
@@ -148,6 +149,29 @@ public class GameScreen extends ScreenAdapter {
         float angleRadians = MathUtils.atan2(mousePos.y - playerCenterY, mousePos.x - playerCenterX);
         float angleDegrees = angleRadians * MathUtils.radiansToDegrees;
 
+        player.setAimAngle(angleDegrees);
+
+        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+            if (TimeUtils.millis() - player.lastShotTime > player.shootCooldown) {
+                spawnBullet();
+                player.lastShotTime = TimeUtils.millis();
+            }
+        }
+    }
+
+    private void spawnBullet() {
+        if (player == null) return;
+        Vector2 mousePos = new Vector2(Gdx.input.getX(), Gdx.input.getY());
+        viewport.unproject(mousePos);
+
+        float playerCenterX = player.position.x + player.getWidth() / 2f;
+        float playerCenterY = player.position.y + player.getHeight() / 2f;
+
+        float angleRad = MathUtils.atan2(mousePos.y - playerCenterY, mousePos.x - playerCenterX);
+        Bullet bullet = new Bullet(bulletTexture, new Vector2(playerCenterX, playerCenterY), angleRad);
+    }
+
+    private void spawnEnemy() {
 
     }
 }

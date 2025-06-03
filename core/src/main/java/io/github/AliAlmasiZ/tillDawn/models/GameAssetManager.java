@@ -122,4 +122,12 @@ public class GameAssetManager {
     public String getCharacter1Idle0() {
         return character1Idle0;
     }
+
+    public Animation<TextureRegion> getCharacterIdleAnim() {
+        return characterIdleAnim;
+    }
+
+    public Animation<TextureRegion> getCharacterRunAnim() {
+        return characterRunAnim;
+    }
 }
