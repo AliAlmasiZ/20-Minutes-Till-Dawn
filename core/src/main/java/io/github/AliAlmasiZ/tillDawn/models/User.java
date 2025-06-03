@@ -14,6 +14,7 @@ public class User {
     private String securityAnswer;
     private int langID;
     private int score;
+    private Player player;
 
 
     private User(){}
@@ -27,6 +28,7 @@ public class User {
         this.langID = 1;
         this.id = ++playersCount;
         score = 0;
+        this.player = new Player();
     }
 
 
@@ -86,5 +88,9 @@ public class User {
 
     public void setScore(int score) {
         this.score = score;
+    }
+
+    public Player getPlayer() {
+        return player;
     }
 }

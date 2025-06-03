@@ -42,6 +42,9 @@ public class GameAssetManager {
 
 
 
+
+
+
     //Textures
 
 
@@ -106,4 +109,7 @@ public class GameAssetManager {
         return gameAssetManager;
     }
 
+    public String getCharacter1Idle0() {
+        return character1Idle0;
+    }
 }

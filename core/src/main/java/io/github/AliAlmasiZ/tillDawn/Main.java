@@ -10,16 +10,18 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import io.github.AliAlmasiZ.tillDawn.controllers.MainMenuController;
 import io.github.AliAlmasiZ.tillDawn.models.GameAssetManager;
 import io.github.AliAlmasiZ.tillDawn.views.MainMenuView;
+import io.github.AliAlmasiZ.tillDawn.views.screens.GameScreen;
 import io.github.AliAlmasiZ.tillDawn.views.screens.MainMenuScreen;
 import io.github.AliAlmasiZ.tillDawn.views.screens.SignUpMenuScreen;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends Game {
-
+    public SpriteBatch batch;
 
     @Override
     public void create() {
-        setScreen(new SignUpMenuScreen(this));
+        batch = new SpriteBatch();
+        setScreen(new GameScreen(this));
     }
 
     @Override

@@ -1,14 +1,24 @@
 package io.github.AliAlmasiZ.tillDawn.views;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.utils.viewport.Viewport;
 import io.github.AliAlmasiZ.tillDawn.models.Player;
 
 public class GameView {
     private OrthographicCamera camera;
-    private ShapeRenderer shapeRenderer;
+    private Viewport viewport;
+    private SpriteBatch batch;
+    private AssetManager assetManager;
+    private Texture playerTexture;
+    private Texture backgroundTexture;
+    private float backgroundWidth;
+    private float backgroundHeight;
 
     public GameView() {
         camera = new OrthographicCamera();
