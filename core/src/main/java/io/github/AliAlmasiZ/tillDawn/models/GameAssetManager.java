@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Array;
 
@@ -17,8 +18,8 @@ public class GameAssetManager {
     public final Skin pixthulhuuiSkin;
 
     //Animations
-    public Animation<Texture> characterIdleAnim;
-    public Animation<Texture> characterRunAnim;
+    public Animation<TextureRegion> characterIdleAnim;
+    public Animation<TextureRegion> characterRunAnim;
 
 
     //Paths
@@ -79,24 +80,22 @@ public class GameAssetManager {
 
 
         // Create animations
-        Array<Texture> idleTextures = new Array<>(new Texture[]{
-            manager.get(character1Idle0, Texture.class),
-            manager.get(character1Idle1, Texture.class),
-            manager.get(character1Idle2, Texture.class),
-            manager.get(character1Idle3, Texture.class),
-            manager.get(character1Idle4, Texture.class),
-            manager.get(character1Idle5, Texture.class)
-        });
+        Array<TextureRegion> idleFrames = new Array<>();
+        idleFrames.add(new TextureRegion(manager.get(character1Idle0, Texture.class)));
+        idleFrames.add(new TextureRegion(manager.get(character1Idle1, Texture.class)));
+        idleFrames.add(new TextureRegion(manager.get(character1Idle2, Texture.class)));
+        idleFrames.add(new TextureRegion(manager.get(character1Idle3, Texture.class)));
+        idleFrames.add(new TextureRegion(manager.get(character1Idle4, Texture.class)));
+        idleFrames.add(new TextureRegion(manager.get(character1Idle5, Texture.class)));
 
-        Array<Texture> runTextures = new Array<>(new Texture[]{
-            manager.get(character1Run0, Texture.class),
-            manager.get(character1Run1, Texture.class),
-            manager.get(character1Run2, Texture.class),
-            manager.get(character1Run3, Texture.class)
-        });
+        Array<TextureRegion> runFrames = new Array<>();
+        runFrames.add(new TextureRegion(manager.get(character1Run0, Texture.class)));
+        runFrames.add(new TextureRegion(manager.get(character1Run1, Texture.class)));
+        runFrames.add(new TextureRegion(manager.get(character1Run2, Texture.class)));
+        runFrames.add(new TextureRegion(manager.get(character1Run3, Texture.class)));
 
-        characterIdleAnim = new Animation<>(0.1f, idleTextures, Animation.PlayMode.LOOP);
-        characterRunAnim = new Animation<>(0.1f, runTextures, Animation.PlayMode.LOOP);
+        characterIdleAnim = new Animation<>(0.1f, idleFrames, Animation.PlayMode.LOOP);
+        characterRunAnim = new Animation<>(0.1f, runFrames, Animation.PlayMode.LOOP);
     }
 
     public void dispose() {
@@ -108,6 +107,17 @@ public class GameAssetManager {
             gameAssetManager = new GameAssetManager();
         return gameAssetManager;
     }
+
+
+    public TextureRegion getCharacterIdleFrame() {
+        // Return the first frame of idle animation or a specific idle TextureRegion
+        if (characterIdleAnim != null && characterIdleAnim.getKeyFrames().length > 0) {
+            return characterIdleAnim.getKeyFrame(0); // First frame of idle
+        }
+        // Fallback or error
+        return null;
+    }
+
 
     public String getCharacter1Idle0() {
         return character1Idle0;
