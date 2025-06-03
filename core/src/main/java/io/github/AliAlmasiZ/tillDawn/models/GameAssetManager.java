@@ -20,6 +20,13 @@ public class GameAssetManager {
     //Animations
     public Animation<TextureRegion> characterIdleAnim;
     public Animation<TextureRegion> characterRunAnim;
+    public Animation<TextureRegion> brainMonsterAnim;
+
+
+    //Textures
+    public Texture xpOrbTex;
+    public Texture bulletTex;
+    public Texture backgroundTileTex;
 
 
     //Paths
@@ -37,6 +44,16 @@ public class GameAssetManager {
     private final String character1Run2 = "Images/Sprite/Run_2.png";
     private final String character1Run3 = "Images/Sprite/Run_3.png";
 
+    //Monsters
+    private final String brainMonster0 = "Images/Sprite/BrainMonster_0.png";
+    private final String brainMonster1 = "Images/Sprite/BrainMonster_1.png";
+    private final String brainMonster2 = "Images/Sprite/BrainMonster_2.png";
+    private final String brainMonster3 = "Images/Sprite/BrainMonster_3.png";
+
+    //Other entities
+    private final String bullet = "bullet.png";
+    private final String xpOrb = "Images/Texture2D/T_SmallCircle.png";
+    private final String backgroundTile = "Images/Sprite/T_TempleTile_3.png";
 
 
 
@@ -45,8 +62,6 @@ public class GameAssetManager {
 
 
 
-
-    //Textures
 
 
 
@@ -72,7 +87,16 @@ public class GameAssetManager {
         manager.load(character1Run2, Texture.class);
         manager.load(character1Run3, Texture.class);
 
-        manager.finishLoading(); // In real game use loading screen
+        manager.load(brainMonster0, Texture.class);
+        manager.load(brainMonster1, Texture.class);
+        manager.load(brainMonster2, Texture.class);
+        manager.load(brainMonster3, Texture.class);
+
+        manager.load(xpOrb, Texture.class);
+        manager.load(bullet, Texture.class);
+        manager.load(backgroundTile, Texture.class);
+
+        manager.finishLoading();
 
         // Initialize skins
         flatEarthSkin = manager.get(flatEarthSkinPath, Skin.class);
@@ -93,6 +117,18 @@ public class GameAssetManager {
         runFrames.add(new TextureRegion(manager.get(character1Run1, Texture.class)));
         runFrames.add(new TextureRegion(manager.get(character1Run2, Texture.class)));
         runFrames.add(new TextureRegion(manager.get(character1Run3, Texture.class)));
+
+        Array<TextureRegion> brainMonsterFrames = new Array<>();
+        brainMonsterFrames.add(new TextureRegion(manager.get(brainMonster0, Texture.class)));
+        brainMonsterFrames.add(new TextureRegion(manager.get(brainMonster1, Texture.class)));
+        brainMonsterFrames.add(new TextureRegion(manager.get(brainMonster2, Texture.class)));
+        brainMonsterFrames.add(new TextureRegion(manager.get(brainMonster3, Texture.class)));
+
+
+        // create Textures
+        xpOrbTex = manager.get(xpOrb, Texture.class);
+        bulletTex = manager.get(bullet, Texture.class);
+        backgroundTileTex = manager.get(backgroundTile, Texture.class);
 
         characterIdleAnim = new Animation<>(0.1f, idleFrames, Animation.PlayMode.LOOP);
         characterRunAnim = new Animation<>(0.1f, runFrames, Animation.PlayMode.LOOP);

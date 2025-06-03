@@ -19,6 +19,7 @@ public class GameView {
     private Texture backgroundTexture;
     private float backgroundWidth;
     private float backgroundHeight;
+    ShapeRenderer shapeRenderer;
 
     public GameView() {
         camera = new OrthographicCamera();

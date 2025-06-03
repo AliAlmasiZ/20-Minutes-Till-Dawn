@@ -2,8 +2,10 @@ package io.github.AliAlmasiZ.tillDawn.models.Entities;
 
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.Sprite;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
@@ -17,9 +19,12 @@ public class Enemy {
     public int damage = 10;
     private Sprite sprite;
     public Rectangle bounds;
+    private float stateTime = 0f;
+    private Animation<TextureRegion> animation;
 
-    public Enemy(Texture texture, Vector2 startPosition) {
-        this.sprite = new Sprite(texture);
+    public Enemy(Animation<TextureRegion> animation, Vector2 startPosition) {
+        this.animation = animation;
+        this.sprite = new Sprite(animation.getKeyFrame(0));
         position = new Vector2(startPosition);
         this.sprite.setPosition(position.x, position.y);
 
@@ -29,6 +34,13 @@ public class Enemy {
     }
 
     public void update(float delta, Vector2 playerCenterPosition) {
+        stateTime += delta;
+        TextureRegion currentRegion = animation.getKeyFrame(stateTime, true);
+
+        sprite.setRegion(currentRegion);
+        sprite.setSize(currentRegion.getRegionWidth(), currentRegion.getRegionHeight());
+        sprite.setOriginCenter();
+
         float angle = MathUtils.atan2(
             playerCenterPosition.y - (position.y + getHeight() / 2f),
             playerCenterPosition.x - (position.x + getWidth() / 2f)
@@ -37,7 +49,8 @@ public class Enemy {
         position.y += MathUtils.sin(angle) * speed * delta;
 
         sprite.setPosition(position.x, position.y);
-        bounds.setPosition(sprite.getX(), sprite.getY());
+        bounds.set(sprite.getX(), sprite.getY(), sprite.getWidth(), sprite.getHeight());
+
     }
 
     public void draw(SpriteBatch batch) {
