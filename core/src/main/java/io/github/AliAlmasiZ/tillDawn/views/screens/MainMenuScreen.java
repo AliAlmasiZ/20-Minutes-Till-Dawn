@@ -15,7 +15,7 @@ public class MainMenuScreen  implements Screen {
 
     public MainMenuScreen(Main main) {
         this.main = main;
-        this.view = new MainMenuView(GameAssetManager.getGameAssetManager().pixthulhuui);
+        this.view = new MainMenuView(GameAssetManager.getGameAssetManager().pixthulhuuiSkin);
 
         view.profileBtn.addListener(new ClickListener() {
             @Override

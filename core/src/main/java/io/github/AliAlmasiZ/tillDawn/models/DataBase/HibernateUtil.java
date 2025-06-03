@@ -1,7 +1,6 @@
 package io.github.AliAlmasiZ.tillDawn.models.DataBase;
 
-import com.badlogic.gdx.Gdx;
-import io.github.AliAlmasiZ.tillDawn.models.Player;
+import io.github.AliAlmasiZ.tillDawn.models.User;
 import org.hibernate.SessionFactory;
 import org.hibernate.boot.Metadata;
 import org.hibernate.boot.MetadataSources;
@@ -18,7 +17,7 @@ public class HibernateUtil {
                 .configure("hibernate.cfg.xml").build();
 
             MetadataSources metadataSources = new MetadataSources(standardRegistry);
-            metadataSources.addAnnotatedClass(Player.class);
+            metadataSources.addAnnotatedClass(User.class);
 
             Metadata metadata = metadataSources.getMetadataBuilder().build();
 

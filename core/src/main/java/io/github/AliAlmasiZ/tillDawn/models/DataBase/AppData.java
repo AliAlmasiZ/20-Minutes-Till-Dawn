@@ -1,18 +1,18 @@
 package io.github.AliAlmasiZ.tillDawn.models.DataBase;
 
-import io.github.AliAlmasiZ.tillDawn.models.Player;
+import io.github.AliAlmasiZ.tillDawn.models.User;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class AppData {
     private static AppData appData;
-    public Player activePlayer;
+    public User activeUser;
 
-    private List<Player> allPlayers;
+    private List<User> allUsers;
 
     private AppData() {
-        allPlayers = new ArrayList<>();
+        allUsers = new ArrayList<>();
     }
 
     public static AppData getAppData() {
@@ -21,11 +21,11 @@ public class AppData {
         return appData;
     }
 
-    public Player getActivePlayer() {
-        return activePlayer;
+    public User getActivePlayer() {
+        return activeUser;
     }
 
-    public void setActivePlayer(Player activePlayer) {
-        this.activePlayer = activePlayer;
+    public void setActivePlayer(User activeUser) {
+        this.activeUser = activeUser;
     }
 }

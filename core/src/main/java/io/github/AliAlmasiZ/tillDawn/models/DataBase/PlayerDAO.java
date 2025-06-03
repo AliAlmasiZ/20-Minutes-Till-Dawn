@@ -1,12 +1,10 @@
 package io.github.AliAlmasiZ.tillDawn.models.DataBase;
 
-import io.github.AliAlmasiZ.tillDawn.models.Player;
+import io.github.AliAlmasiZ.tillDawn.models.User;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
 
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,12 +25,12 @@ public class PlayerDAO {
 //            pstmt.executeUpdate();
 //        }
 //    }
-    public void savePlayer(Player player) {
+    public void savePlayer(User user) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = session.beginTransaction();
 
 
-        session.save(player);
+        session.save(user);
         tx.commit();
         session.close();
 
@@ -55,36 +53,36 @@ public class PlayerDAO {
 //        return null;
 //    }
 
-    public Player loadPlayer(String username) {
+    public User loadPlayer(String username) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = session.beginTransaction();
 
-        Player player = session.createQuery("FROM Player WHERE username = :username", Player.class)
+        User user = session.createQuery("FROM Player WHERE username = :username", User.class)
             .setParameter("username", username)
             .uniqueResult();
 
         tx.commit();
         session.close();
 
-        return player;
+        return user;
     }
 
-    public Player loadPlayer(int id) {
+    public User loadPlayer(int id) {
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = session.beginTransaction();
 
-        return session.get(Player.class, id);
+        return session.get(User.class, id);
     }
 
-    public List<Player> loadAllPlayers() {
+    public List<User> loadAllPlayers() {
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = session.beginTransaction();
 
-        List<Player> players = new ArrayList<>(session.createQuery("FROM Player", Player.class).list());
+        List<User> users = new ArrayList<>(session.createQuery("FROM Player", User.class).list());
 
         tx.commit();
         session.close();
 
-        return players;
+        return users;
     }
 }

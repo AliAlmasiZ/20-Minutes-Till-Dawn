@@ -3,10 +3,8 @@ package io.github.AliAlmasiZ.tillDawn.controllers;
 import io.github.AliAlmasiZ.tillDawn.models.DataBase.AppData;
 import io.github.AliAlmasiZ.tillDawn.models.DataBase.DataBaseManager;
 import io.github.AliAlmasiZ.tillDawn.models.DataBase.PlayerDAO;
-import io.github.AliAlmasiZ.tillDawn.models.Player;
+import io.github.AliAlmasiZ.tillDawn.models.User;
 import io.github.AliAlmasiZ.tillDawn.models.Result;
-
-import java.sql.SQLException;
 
 public class SignupMenuController {
     public Result signup(String username, String password, String securityAnswer) {
@@ -14,13 +12,13 @@ public class SignupMenuController {
 //            DataBaseManager.connect();
 //            DataBaseManager.initializeFromSchema();
             PlayerDAO playerDAO = new PlayerDAO(DataBaseManager.getConnection());
-            Player p = playerDAO.loadPlayer(username);
+            User p = playerDAO.loadPlayer(username);
             if (p != null) {
                 return new Result(false, "User Already exists!");
             }
-            Player player = new Player(username, password, securityAnswer);
-            AppData.getAppData().setActivePlayer(player);
-            playerDAO.savePlayer(player);
+            User user = new User(username, password, securityAnswer);
+            AppData.getAppData().setActivePlayer(user);
+            playerDAO.savePlayer(user);
             return new Result(true, "User with username \"" + username + "\" saved successfully!");
 //        }
 //        catch (SQLException e) {

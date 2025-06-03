@@ -18,7 +18,7 @@ public class LoginMenuScreen implements Screen {
 
     public LoginMenuScreen(Main main) {
         this.controller = new LoginMenuController();
-        this.view = new LoginMenuView(GameAssetManager.getGameAssetManager().pixthulhuui);
+        this.view = new LoginMenuView(GameAssetManager.getGameAssetManager().pixthulhuuiSkin);
         this.main = main;
 
         view.loginButton.addListener(new ClickListener() {

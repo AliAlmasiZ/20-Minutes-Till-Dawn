@@ -11,8 +11,6 @@ import io.github.AliAlmasiZ.tillDawn.models.GameAssetManager;
 import io.github.AliAlmasiZ.tillDawn.models.Result;
 import io.github.AliAlmasiZ.tillDawn.views.SignupMenuView;
 
-import java.util.jar.Manifest;
-
 public class SignUpMenuScreen implements Screen {
     private final Main main;
     private final SignupMenuView view;
@@ -21,7 +19,7 @@ public class SignUpMenuScreen implements Screen {
     public SignUpMenuScreen(Main main) {
         this.main = main;
         this.controller = new SignupMenuController();
-        this.view = new SignupMenuView(GameAssetManager.getGameAssetManager().pixthulhuui);
+        this.view = new SignupMenuView(GameAssetManager.getGameAssetManager().pixthulhuuiSkin);
 
         view.loginMenuBtn.addListener(new ClickListener() {
             @Override

@@ -1,14 +1,13 @@
 package io.github.AliAlmasiZ.tillDawn.views.screens;
 
 import com.badlogic.gdx.Screen;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import io.github.AliAlmasiZ.tillDawn.Main;
 import io.github.AliAlmasiZ.tillDawn.models.GameAssetManager;
 import io.github.AliAlmasiZ.tillDawn.views.ProfileMenuView;
 
 public class ProfileMenuScreen implements Screen {
     private final Main main;
-    private final ProfileMenuView view = new ProfileMenuView(GameAssetManager.getGameAssetManager().pixthulhuui);
+    private final ProfileMenuView view = new ProfileMenuView(GameAssetManager.getGameAssetManager().pixthulhuuiSkin);
 
 
     public ProfileMenuScreen(Main main) {
