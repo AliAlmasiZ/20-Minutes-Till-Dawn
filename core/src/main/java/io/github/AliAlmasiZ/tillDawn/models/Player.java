@@ -25,6 +25,7 @@ public class Player {
     private float stateTime = 0f;
     public boolean isMoving = false;
     private float aimAngleDegrees = 0f;
+    public static final float PLAYER_SCALE = 1.5f;
 
     public Rectangle bounds;
 //////////////////////////////////////////////////////////
@@ -41,6 +42,7 @@ public class Player {
     public long lastHitTime = 0;
     public long invincibilityDuration = 1000;
 
+
     public Player() {
         position = new Vector2();
 
@@ -49,6 +51,7 @@ public class Player {
 
         this.sprite = new Sprite(this.idleAnimation.getKeyFrame(0));
         this.sprite.setOriginCenter();
+        this.sprite.setScale(PLAYER_SCALE);
         this.bounds = new Rectangle(); // Will be set in update()
 
     }

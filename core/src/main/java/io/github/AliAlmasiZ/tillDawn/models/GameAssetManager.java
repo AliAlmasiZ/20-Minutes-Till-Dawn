@@ -132,6 +132,7 @@ public class GameAssetManager {
 
         characterIdleAnim = new Animation<>(0.1f, idleFrames, Animation.PlayMode.LOOP);
         characterRunAnim = new Animation<>(0.1f, runFrames, Animation.PlayMode.LOOP);
+        brainMonsterAnim = new Animation<>(0.1f, brainMonsterFrames, Animation.PlayMode.LOOP);
     }
 
     public void dispose() {

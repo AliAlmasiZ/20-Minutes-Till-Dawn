@@ -15,13 +15,18 @@ public class Bullet {
     public Sprite sprite;
     public Rectangle bounds;
     private Vector2 velocity;
+    public static final float BULLET_SCALE = 0.1f; // Bullet will be 50% smaller
+
+
 
     public Bullet(Texture texture, Vector2 startPosition, float angleRad) {
         this.sprite = new Sprite(texture);
+//        this.sprite.setSize(20, 20);
         this.position = new Vector2(startPosition.x - texture.getWidth() / 2f,
             startPosition.y - texture.getHeight() / 2f);
         this.sprite.setPosition(position.x, position.y);
         this.sprite.setOriginCenter();
+        this.sprite.setSize(20, 20);
         this.sprite.setRotation(angleRad * MathUtils.radiansToDegrees);
 
         this.bounds = new Rectangle(sprite.getX(), sprite.getY(), sprite.getWidth(), sprite.getHeight());

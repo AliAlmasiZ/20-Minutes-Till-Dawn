@@ -6,6 +6,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
@@ -30,6 +31,7 @@ import io.github.AliAlmasiZ.tillDawn.models.Entities.XPOrb;
 import io.github.AliAlmasiZ.tillDawn.models.GameAssetManager;
 import io.github.AliAlmasiZ.tillDawn.models.Player;
 import io.github.AliAlmasiZ.tillDawn.models.enums.GameAction;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 
 
 import java.util.Map;
@@ -70,8 +72,8 @@ public class GameScreen extends ScreenAdapter {
     private Sound xpPickupSound;
     private Sound levelUpSound;
 
-    private static final float GAME_WORLD_WIDTH = 1600;
-    private static final float GAME_WORLD_HEIGHT = 900;
+    private static final float GAME_WORLD_WIDTH = 1280;
+    private static final float GAME_WORLD_HEIGHT = 720;
 
 
     public GameScreen(Main main) {
@@ -115,6 +117,20 @@ public class GameScreen extends ScreenAdapter {
         bullets = new Array<>();
         xpOrbs = new Array<>();
         shapeRenderer = new ShapeRenderer();
+
+
+
+
+
+        try {
+            font = new BitmapFont(Gdx.files.internal("Fonts/Font/ChevyRay - Express.ttf"));
+            font.setColor(Color.WHITE);
+
+        } catch (Exception e) {
+            Gdx.app.error("GameScreen", "Could not load bitmap font 'fonts/yourfont.fnt'. Make sure the .fnt and .png files are in assets/fonts/", e);
+            font = new BitmapFont();
+            font.setColor(Color.RED);
+        }
 
 
         lastEnemySpawnTime = TimeUtils.millis();
@@ -171,8 +187,9 @@ public class GameScreen extends ScreenAdapter {
 
         player.setAimAngle(angleDegrees);
 
-        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
-            if (TimeUtils.millis() - player.lastShotTime > player.shootCooldown) {
+        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) || Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+
+            if (TimeUtils.millis() - player.lastShotTime > player.shootCooldown || true) {
                 spawnBullet();
                 player.lastShotTime = TimeUtils.millis();
             }
@@ -189,6 +206,7 @@ public class GameScreen extends ScreenAdapter {
 
         float angleRad = MathUtils.atan2(mousePos.y - playerCenterY, mousePos.x - playerCenterX);
         Bullet bullet = new Bullet(bulletTexture, new Vector2(playerCenterX, playerCenterY), angleRad);
+        bullets.add(bullet);
     }
 
     private void spawnEnemy() {
@@ -264,7 +282,7 @@ public class GameScreen extends ScreenAdapter {
             Bullet bullet = bullets.get(i);
             Rectangle bulletBounds = bullet.getBounds();
             for (int j = enemies.size - 1; j >= 0 ; j--) {
-                Enemy enemy = enemies.get(i);
+                Enemy enemy = enemies.get(j);
                 if(bulletBounds.overlaps(enemy.getBounds())) {
                     bullets.removeIndex(i);
                     enemy.takeDamage(player.damage);
@@ -365,7 +383,7 @@ public class GameScreen extends ScreenAdapter {
         for(Bullet bullet : bullets) bullet.draw(batch);
         batch.end();
 
-        shapeRenderer.begin();
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         if (player != null) player.drawHealthBar(shapeRenderer);
         for (Enemy enemy : enemies) enemy.drawHealthBar(shapeRenderer);
         shapeRenderer.end();
