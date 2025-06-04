@@ -10,7 +10,7 @@ public class XPOrb {
     public Vector2 position;
     public Sprite sprite;
     public Rectangle bounds;
-    public int xpValue = 10;
+    public int xpValue = 3;
 
     public XPOrb(Texture texture, Vector2 startPosition) {
         this.sprite = new Sprite(texture);

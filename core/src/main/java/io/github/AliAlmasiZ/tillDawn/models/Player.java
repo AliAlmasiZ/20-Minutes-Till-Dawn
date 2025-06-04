@@ -49,9 +49,11 @@ public class Player {
         this.idleAnimation = GameAssetManager.getGameAssetManager().getCharacterIdleAnim(); // Get idle animation
         this.walkAnimation = GameAssetManager.getGameAssetManager().getCharacterRunAnim();
 
-        this.sprite = new Sprite(this.idleAnimation.getKeyFrame(0));
+        TextureRegion textureRegion = this.idleAnimation.getKeyFrame(0);
+        this.sprite = new Sprite();
         this.sprite.setOriginCenter();
-        this.sprite.setScale(PLAYER_SCALE);
+        this.sprite.setSize(textureRegion.getRegionWidth() * 3, textureRegion.getRegionHeight() * 3);
+//        this.sprite.setScale(PLAYER_SCALE);
         this.bounds = new Rectangle(); // Will be set in update()
 
     }
@@ -78,7 +80,7 @@ public class Player {
                 sprite.getRegionHeight() != currentRegion.getRegionHeight();
             if(regionChanged) {
                 sprite.setRegion(currentRegion);
-                sprite.setSize(currentRegion.getRegionWidth(), currentRegion.getRegionHeight());
+                sprite.setSize(currentRegion.getRegionWidth() * 3, currentRegion.getRegionHeight() * 3);
                 sprite.setOriginCenter();
             }
         } else {
@@ -104,11 +106,11 @@ public class Player {
     }
 
     public float getWidth() {
-        return sprite != null ? sprite.getRegionWidth() : 0;
+        return sprite != null ? sprite.getWidth() : 0;
     }
 
     public float getHeight() {
-        return sprite != null ? sprite.getRegionHeight() : 0;
+        return sprite != null ? sprite.getHeight() : 0;
     }
 
     public void drawHealthBar(ShapeRenderer shapeRenderer) {

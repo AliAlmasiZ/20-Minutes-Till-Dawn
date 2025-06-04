@@ -14,13 +14,18 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
+import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import io.github.AliAlmasiZ.tillDawn.Main;
 import io.github.AliAlmasiZ.tillDawn.controllers.utils.ControlsManager;
@@ -31,7 +36,6 @@ import io.github.AliAlmasiZ.tillDawn.models.Entities.XPOrb;
 import io.github.AliAlmasiZ.tillDawn.models.GameAssetManager;
 import io.github.AliAlmasiZ.tillDawn.models.Player;
 import io.github.AliAlmasiZ.tillDawn.models.enums.GameAction;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 
 
 import java.util.Map;
@@ -72,8 +76,22 @@ public class GameScreen extends ScreenAdapter {
     private Sound xpPickupSound;
     private Sound levelUpSound;
 
-    private static final float GAME_WORLD_WIDTH = 1280;
-    private static final float GAME_WORLD_HEIGHT = 720;
+    // UI Stage and elements
+    private Stage uiStage;
+    private Table uiTableRoot;
+    private Label scoreLabel;
+    private Label timeLabel;
+    private Label healthLabel;
+    private Label levelLabel;
+    private Label xpLabel;
+    private Label pauseMessageLabel;
+    private Label gameOverMessageLabel;
+    private Label finalScoreLabel;
+    private Label restartMessageLabel;
+    private Table messagesTable; // Table for pause/game over messages
+
+    private static final float GAME_WORLD_WIDTH = 1920;
+    private static final float GAME_WORLD_HEIGHT = 1080;
 
 
     public GameScreen(Main main) {
@@ -85,7 +103,8 @@ public class GameScreen extends ScreenAdapter {
     public void show() {
         camera = new OrthographicCamera();
 
-        viewport = new FitViewport(GAME_WORLD_WIDTH, GAME_WORLD_HEIGHT, camera);
+//        viewport = new FitViewport(GAME_WORLD_WIDTH, GAME_WORLD_HEIGHT, camera);
+        viewport = new ScreenViewport(camera);
         camera.setToOrtho(false, GAME_WORLD_WIDTH, GAME_WORLD_HEIGHT);
 
 
@@ -120,17 +139,66 @@ public class GameScreen extends ScreenAdapter {
 
 
 
-
-
+        FreeTypeFontGenerator generator = null;
         try {
-            font = new BitmapFont(Gdx.files.internal("Fonts/Font/ChevyRay - Express.ttf"));
-            font.setColor(Color.WHITE);
+
+            generator = new FreeTypeFontGenerator(Gdx.files.internal("Fonts/Font/ChevyRay - Express.ttf"));
+            FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+            parameter.size = 24;
+            parameter.color = Color.WHITE;
+            font = generator.generateFont(parameter);
+//            font = new BitmapFont(Gdx.files.internal("Fonts/Font/ChevyRay - Express.ttf"));
+//            font.setColor(Color.WHITE);
 
         } catch (Exception e) {
             Gdx.app.error("GameScreen", "Could not load bitmap font 'fonts/yourfont.fnt'. Make sure the .fnt and .png files are in assets/fonts/", e);
             font = new BitmapFont();
             font.setColor(Color.RED);
+        } finally {
+            if(generator != null)
+                generator.dispose();
         }
+
+        // --- UI STAGE SETUP ---
+        uiStage = new Stage(new ScreenViewport(), batch);
+//        Gdx.input.setInputProcessor(uiStage);
+
+        Label.LabelStyle labelStyle = new Label.LabelStyle(font, Color.WHITE);
+
+        scoreLabel = new Label("Score: 0", labelStyle);
+        timeLabel = new Label("Time: 00:00", labelStyle);
+        healthLabel = new Label("Health: 100/100", labelStyle);
+        levelLabel = new Label("Level: 1", labelStyle);
+        xpLabel = new Label("XP: 0/100", labelStyle);
+
+        pauseMessageLabel = new Label("PAUSED (Press " + ControlsManager.getKeyNameForAction(GameAction.PAUSE) + " or ESC to resume)", labelStyle);
+        gameOverMessageLabel = new Label("GAME OVER", labelStyle);
+        finalScoreLabel = new Label("Final Score: 0", labelStyle);
+        restartMessageLabel = new Label("Press R to Restart", labelStyle);
+
+        uiTableRoot = new Table();
+        uiTableRoot.setFillParent(true);
+        uiStage.addActor(uiTableRoot);
+
+        Table statsTable = new Table();
+        statsTable.top().left().pad(10);
+        statsTable.add(scoreLabel).left().row();
+        statsTable.add(timeLabel).left().row();
+        statsTable.add(healthLabel).left().row();
+        statsTable.add(levelLabel).left().row();
+        statsTable.add(xpLabel).left().row();
+
+        messagesTable = new Table();
+        messagesTable.center();
+        messagesTable.add(pauseMessageLabel).center().row();
+        messagesTable.add(gameOverMessageLabel).center().padTop(10).row();
+        messagesTable.add(finalScoreLabel).center().padTop(5).row();
+        messagesTable.add(restartMessageLabel).center().padTop(5).row();
+        messagesTable.setVisible(false);
+
+        uiTableRoot.add(statsTable).expandX().top().left(); // Stats table at top-left
+        uiTableRoot.row(); // New row
+        uiTableRoot.add(messagesTable).expand().fill().center(); // Messages table takes remaining space, centered
 
 
         lastEnemySpawnTime = TimeUtils.millis();
@@ -138,7 +206,13 @@ public class GameScreen extends ScreenAdapter {
     }
 
     private void handleInput(float delta) {
-        if(gameOver) return;
+        if (gameOver) {
+            if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
+                main.setScreen(new GameScreen(main));
+                dispose();
+                return;
+            }
+        }
 
         if(Gdx.input.isKeyJustPressed(ControlsManager.getKeyForAction(GameAction.PAUSE)) ||
             Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
@@ -194,6 +268,10 @@ public class GameScreen extends ScreenAdapter {
                 player.lastShotTime = TimeUtils.millis();
             }
         }
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F1)) {
+            player.health = player.maxHealth;
+        }
     }
 
     private void spawnBullet() {
@@ -228,6 +306,7 @@ public class GameScreen extends ScreenAdapter {
         Enemy enemy = new Enemy(enemyAnim, new Vector2(spawnX, spawnY));
         enemies.add(enemy);
         lastEnemySpawnTime = TimeUtils.millis();
+        enemySpawnInterval *= 0.99f;
     }
 
     private void spawnXPOrb(Vector2 position) {
@@ -323,6 +402,35 @@ public class GameScreen extends ScreenAdapter {
     }
 
 
+    private void updateUILabels() {
+        if (player == null || scoreLabel == null) return; // Ensure UI elements are initialized
+
+        scoreLabel.setText("Score: " + score);
+        timeLabel.setText(String.format("Time: %02d:%02d", (int)(gameTimer / 60), (int)(gameTimer % 60)));
+        healthLabel.setText("Health: " + player.health + "/" + player.maxHealth);
+        levelLabel.setText("Level: " + player.level);
+        xpLabel.setText("XP: " + player.xp + "/" + player.xpToNextLevel);
+
+        if (isPaused && !gameOver) {
+            messagesTable.setVisible(true);
+            pauseMessageLabel.setVisible(true);
+            gameOverMessageLabel.setVisible(false);
+            finalScoreLabel.setVisible(false);
+            restartMessageLabel.setVisible(false);
+        } else if (gameOver) {
+            messagesTable.setVisible(true);
+            pauseMessageLabel.setVisible(false);
+            String outcome = (gameTimer >= MAX_GAME_TIME) ? "YOU SURVIVED!" : "GAME OVER";
+            gameOverMessageLabel.setText(outcome);
+            gameOverMessageLabel.setVisible(true);
+            finalScoreLabel.setText("Final Score: " + score);
+            finalScoreLabel.setVisible(true);
+            restartMessageLabel.setVisible(true);
+        } else {
+            messagesTable.setVisible(false);
+        }
+    }
+
     @Override
     public void render(float delta) {
         handleInput(delta);
@@ -387,34 +495,43 @@ public class GameScreen extends ScreenAdapter {
         if (player != null) player.drawHealthBar(shapeRenderer);
         for (Enemy enemy : enemies) enemy.drawHealthBar(shapeRenderer);
         shapeRenderer.end();
+//
+//        batch.begin();
+//        font.draw(batch, "Score: " + score, 20, viewport.getScreenHeight() - 20);
+//        font.draw(batch, String.format("Time: %02d:%02d", (int)(gameTimer / 60), (int)(gameTimer % 60)), viewport.getScreenWidth() - 150, viewport.getScreenHeight() - 20);
+//        if (player != null) {
+//            font.draw(batch, "Level: " + player.level + " XP: " + player.xp + "/" + player.xpToNextLevel, 20, viewport.getScreenHeight() - 50);
+//            font.draw(batch, "Health: " + player.health + "/" + player.maxHealth, 20, viewport.getScreenHeight() - 80);
+//        }
+//
+//        if (isPaused && !gameOver) {
+//            font.draw(batch, "PAUSED (Press " + ControlsManager.getKeyNameForAction(GameAction.PAUSE) + " or ESC to resume)", viewport.getScreenWidth() / 2f - 200, viewport.getScreenHeight() / 2f);
+//        }
+//        if (gameOver) {
+//            String outcome = (gameTimer >= MAX_GAME_TIME) ? "YOU SURVIVED!" : "GAME OVER";
+//            font.draw(batch, outcome, viewport.getScreenWidth() / 2f - 100, viewport.getScreenHeight() / 2f + 50);
+//            font.draw(batch, "Final Score: " + score, viewport.getScreenWidth() / 2f - 100, viewport.getScreenHeight() / 2f);
+//            font.draw(batch, "Press R to Restart", viewport.getScreenWidth() / 2f - 100, viewport.getScreenHeight() / 2f - 50);
+//            if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {//TODO
+//                main.setScreen(new GameScreen(main));
+//                dispose();
+//            }
+//        }
+//        batch.end();
 
-        batch.begin();
-        font.draw(batch, "Score: " + score, 20, viewport.getScreenHeight() - 20);
-        font.draw(batch, String.format("Time: %02d:%02d", (int)(gameTimer / 60), (int)(gameTimer % 60)), viewport.getScreenWidth() - 150, viewport.getScreenHeight() - 20);
-        if (player != null) {
-            font.draw(batch, "Level: " + player.level + " XP: " + player.xp + "/" + player.xpToNextLevel, 20, viewport.getScreenHeight() - 50);
-            font.draw(batch, "Health: " + player.health + "/" + player.maxHealth, 20, viewport.getScreenHeight() - 80);
-        }
-
-        if (isPaused && !gameOver) {
-            font.draw(batch, "PAUSED (Press " + ControlsManager.getKeyNameForAction(GameAction.PAUSE) + " or ESC to resume)", viewport.getScreenWidth() / 2f - 200, viewport.getScreenHeight() / 2f);
-        }
-        if (gameOver) {
-            String outcome = (gameTimer >= MAX_GAME_TIME) ? "YOU SURVIVED!" : "GAME OVER";
-            font.draw(batch, outcome, viewport.getScreenWidth() / 2f - 100, viewport.getScreenHeight() / 2f + 50);
-            font.draw(batch, "Final Score: " + score, viewport.getScreenWidth() / 2f - 100, viewport.getScreenHeight() / 2f);
-            font.draw(batch, "Press R to Restart", viewport.getScreenWidth() / 2f - 100, viewport.getScreenHeight() / 2f - 50);
-            if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {//TODO
-                main.setScreen(new GameScreen(main));
-                dispose();
-            }
-        }
-        batch.end();
+        // Render UI
+        updateUILabels();
+        uiStage.getViewport().apply();
+        uiStage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
+        uiStage.draw();
     }
 
     @Override
     public void resize(int width, int height) {
         viewport.update(width, height, true);
+        if (uiStage != null) {
+            uiStage.getViewport().update(width, height, true);
+        }
     }
 
     @Override

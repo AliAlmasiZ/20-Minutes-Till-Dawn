@@ -21,12 +21,12 @@ public class Bullet {
 
     public Bullet(Texture texture, Vector2 startPosition, float angleRad) {
         this.sprite = new Sprite(texture);
-//        this.sprite.setSize(20, 20);
-        this.position = new Vector2(startPosition.x - texture.getWidth() / 2f,
-            startPosition.y - texture.getHeight() / 2f);
+        this.sprite.setSize(20, 20);
+        this.position = new Vector2(startPosition.x - sprite.getWidth() / 2f,
+            startPosition.y - sprite.getHeight() / 2f);
         this.sprite.setPosition(position.x, position.y);
         this.sprite.setOriginCenter();
-        this.sprite.setSize(20, 20);
+//        this.sprite.setSize(20, 20);
         this.sprite.setRotation(angleRad * MathUtils.radiansToDegrees);
 
         this.bounds = new Rectangle(sprite.getX(), sprite.getY(), sprite.getWidth(), sprite.getHeight());

@@ -6,7 +6,6 @@ targetCompatibility = JavaVersion.VERSION_21
 dependencies {
   api "com.badlogicgames.gdx:gdx:$gdxVersion"
   api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
-
   implementation 'mysql:mysql-connector-java:8.0.33'
 
 
