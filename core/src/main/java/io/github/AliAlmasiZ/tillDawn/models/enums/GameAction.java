@@ -6,5 +6,6 @@ public enum GameAction {
     MOVE_LEFT,
     MOVE_RIGHT,
     SHOOT,
-    PAUSE
+    PAUSE,
+    TOGGLE_AUTO_AIM
 }

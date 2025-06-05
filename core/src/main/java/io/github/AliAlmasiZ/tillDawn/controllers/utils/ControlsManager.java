@@ -29,6 +29,7 @@ public class ControlsManager {
         keyMappings.put(GameAction.PAUSE, prefs.getInteger(GameAction.PAUSE.name(), Input.Keys.P));
 
         keyMappings.put(GameAction.SHOOT, prefs.getInteger(GameAction.SHOOT.name(), -1));
+        keyMappings.put(GameAction.TOGGLE_AUTO_AIM, prefs.getInteger(GameAction.TOGGLE_AUTO_AIM.name(), Input.Keys.SPACE));
     }
 
     public static void saveControls() {
@@ -66,6 +67,7 @@ public class ControlsManager {
         keyMappings.put(GameAction.MOVE_RIGHT, Input.Keys.D);
         keyMappings.put(GameAction.PAUSE, Input.Keys.P);
         keyMappings.put(GameAction.SHOOT, -1);
+        keyMappings.put(GameAction.TOGGLE_AUTO_AIM, Input.Keys.SPACE);
 
         saveControls();
         Gdx.app.log("ControlsManager", "Controls reset to defaults.");

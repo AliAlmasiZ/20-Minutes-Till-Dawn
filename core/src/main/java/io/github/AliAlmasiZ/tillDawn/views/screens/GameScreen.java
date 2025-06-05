@@ -6,10 +6,7 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -88,7 +85,15 @@ public class GameScreen extends ScreenAdapter {
     private Label gameOverMessageLabel;
     private Label finalScoreLabel;
     private Label restartMessageLabel;
-    private Table messagesTable; // Table for pause/game over messages
+    private Table messagesTable;
+    private Label autoAimStatusLabel;
+
+
+    private boolean autoAimEnabled = false;
+
+    private Pixmap cursorPixmap;
+    private Cursor customCursor;
+
 
     private static final float GAME_WORLD_WIDTH = 1920;
     private static final float GAME_WORLD_HEIGHT = 1080;
@@ -101,11 +106,15 @@ public class GameScreen extends ScreenAdapter {
 
     @Override
     public void show() {
-        camera = new OrthographicCamera();
+        ControlsManager.refreshControls();
 
 //        viewport = new FitViewport(GAME_WORLD_WIDTH, GAME_WORLD_HEIGHT, camera);
+        camera = new OrthographicCamera();
         viewport = new ScreenViewport(camera);
         camera.setToOrtho(false, GAME_WORLD_WIDTH, GAME_WORLD_HEIGHT);
+
+        Gdx.input.setCursorCatched(false);
+
 
 
         playerTexture = new Texture(GameAssetManager.getGameAssetManager().getCharacter1Idle0());
@@ -161,7 +170,7 @@ public class GameScreen extends ScreenAdapter {
 
         // --- UI STAGE SETUP ---
         uiStage = new Stage(new ScreenViewport(), batch);
-//        Gdx.input.setInputProcessor(uiStage);
+        Gdx.input.setInputProcessor(uiStage);
 
         Label.LabelStyle labelStyle = new Label.LabelStyle(font, Color.WHITE);
 
@@ -170,6 +179,7 @@ public class GameScreen extends ScreenAdapter {
         healthLabel = new Label("Health: 100/100", labelStyle);
         levelLabel = new Label("Level: 1", labelStyle);
         xpLabel = new Label("XP: 0/100", labelStyle);
+        autoAimStatusLabel = new Label("Auto-Aim: OFF", labelStyle);
 
         pauseMessageLabel = new Label("PAUSED (Press " + ControlsManager.getKeyNameForAction(GameAction.PAUSE) + " or ESC to resume)", labelStyle);
         gameOverMessageLabel = new Label("GAME OVER", labelStyle);
@@ -187,6 +197,8 @@ public class GameScreen extends ScreenAdapter {
         statsTable.add(healthLabel).left().row();
         statsTable.add(levelLabel).left().row();
         statsTable.add(xpLabel).left().row();
+        statsTable.add(autoAimStatusLabel).left().padTop(5).row();
+
 
         messagesTable = new Table();
         messagesTable.center();
@@ -201,10 +213,56 @@ public class GameScreen extends ScreenAdapter {
         uiTableRoot.add(messagesTable).expand().fill().center(); // Messages table takes remaining space, centered
 
 
+        try {
+            cursorPixmap = new Pixmap(Gdx.files.internal("Images/Sprite/T_CursorSprite.png"));
+            int xHotSpot = cursorPixmap.getWidth() / 2;
+            int yHotSpot = cursorPixmap.getHeight() / 2;
+
+            if (cursorPixmap.getWidth() > 0 && cursorPixmap.getHeight() > 0) {
+                customCursor = Gdx.graphics.newCursor(cursorPixmap, xHotSpot, yHotSpot);
+                Gdx.graphics.setCursor(customCursor);
+            } else {
+                Gdx.app.error("GameScreen", "Cursor pixmap is empty or could not be loaded.");
+            }
+        } catch (Exception e) {
+            Gdx.app.error("GameScreen", "Could not load custom cursor: cursors/custom_cursor.png", e);
+        }
+
+        if (cursorPixmap != null) {
+            cursorPixmap.dispose();
+            cursorPixmap = null;
+        }
+
         lastEnemySpawnTime = TimeUtils.millis();
 
     }
 
+    private Enemy findNearestEnemy() {
+        if (player == null || enemies.isEmpty()) {
+            return null;
+        }
+        Enemy nearestEnemy = null;
+        float minDistanceSq = Float.MAX_VALUE;
+
+        Vector2 playerCenter = new Vector2(
+            player.position.x + player.getWidth() / 2f,
+            player.position.y + player.getHeight() / 2f
+        );
+
+        for (Enemy enemy : enemies) {
+            if (enemy == null) continue;
+            Vector2 enemyCenter = new Vector2(
+                enemy.position.x + enemy.getWidth() / 2f,
+                enemy.position.y + enemy.getHeight() / 2f
+            );
+            float distanceSq = playerCenter.dst2(enemyCenter);
+            if (distanceSq < minDistanceSq) {
+                minDistanceSq = distanceSq;
+                nearestEnemy = enemy;
+            }
+        }
+        return nearestEnemy;
+    }
     private void handleInput(float delta) {
         if (gameOver) {
             if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
@@ -217,6 +275,11 @@ public class GameScreen extends ScreenAdapter {
         if(Gdx.input.isKeyJustPressed(ControlsManager.getKeyForAction(GameAction.PAUSE)) ||
             Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             isPaused = !isPaused;
+        }
+
+        if(Gdx.input.isKeyJustPressed(ControlsManager.getKeyForAction(GameAction.TOGGLE_AUTO_AIM))) {
+            autoAimEnabled = !autoAimEnabled;
+            Gdx.app.log("GameScreen", "Auto-aim " + (autoAimEnabled ? "enabled" : "disabled"));
         }
 
         if(isPaused) {
@@ -250,18 +313,62 @@ public class GameScreen extends ScreenAdapter {
 
         player.isMoving = movedX || movedY;
 
-        Vector2 mousePos = new Vector2(Gdx.input.getX(), Gdx.input.getY());
-        viewport.unproject(mousePos);
+//        Vector2 mousePos = new Vector2(Gdx.input.getX(), Gdx.input.getY());
+//        viewport.unproject(mousePos);
+//
+//        float playerCenterX = player.position.x + playerTexture.getWidth() / 2f;
+//        float playerCenterY = player.position.y + playerTexture.getHeight() / 2f;
+//
+//        float angleRadians = MathUtils.atan2(mousePos.y - playerCenterY, mousePos.x - playerCenterX);
+//        float angleDegrees = angleRadians * MathUtils.radiansToDegrees;
+//
+//        player.setAimAngle(angleDegrees);
 
-        float playerCenterX = player.position.x + playerTexture.getWidth() / 2f;
-        float playerCenterY = player.position.y + playerTexture.getHeight() / 2f;
+        // Aiming Logic
+        if (autoAimEnabled) {
+            Enemy targetEnemy = findNearestEnemy();
+            if (targetEnemy != null) {
+                float playerCenterX = player.position.x + player.getWidth() / 2f;
+                float playerCenterY = player.position.y + player.getHeight() / 2f;
+                float enemyCenterX = targetEnemy.position.x + targetEnemy.getWidth() / 2f;
+                float enemyCenterY = targetEnemy.position.y + targetEnemy.getHeight() / 2f;
 
-        float angleRadians = MathUtils.atan2(mousePos.y - playerCenterY, mousePos.x - playerCenterX);
-        float angleDegrees = angleRadians * MathUtils.radiansToDegrees;
+                float angleRadians = MathUtils.atan2(enemyCenterY - playerCenterY, enemyCenterX - playerCenterX);
+                player.setAimAngle(angleRadians * MathUtils.radiansToDegrees);
 
-        player.setAimAngle(angleDegrees);
+                // --- MOVE OS CURSOR ---
+                Vector2 enemyScreenPos = new Vector2(enemyCenterX, enemyCenterY);
+//                viewport.project(enemyScreenPos);
+                Vector2 enemyViewportScreenPos = viewport.project(new Vector2(enemyScreenPos)); // Use a new vector to avoid modifying original
 
-        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT) || Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+                int screenX = (int) enemyViewportScreenPos.x;
+                int screenY = Gdx.graphics.getHeight() - (int) enemyViewportScreenPos.y;
+//                Gdx.input.setCursorPosition(screenX, screenY);
+                Gdx.app.log("AutoAimCursor", "Targeting enemy at world (" + enemyCenterX + ", " + enemyCenterY +
+                    "), projected to viewport screen (" + enemyViewportScreenPos.x + ", " + enemyViewportScreenPos.y +
+                    "), setting OS cursor to (" + screenX + ", " + screenY + ")");
+                Gdx.input.setCursorPosition(screenX, screenY);
+                // --- END MOVE OS CURSOR ---
+
+
+            } else {
+                Vector2 mousePos = new Vector2(Gdx.input.getX(), Gdx.input.getY());
+                viewport.unproject(mousePos);
+                float playerCenterX = player.position.x + player.getWidth() / 2f;
+                float playerCenterY = player.position.y + player.getHeight() / 2f;
+                float angleRadians = MathUtils.atan2(mousePos.y - playerCenterY, mousePos.x - playerCenterX);
+                player.setAimAngle(angleRadians * MathUtils.radiansToDegrees);
+            }
+        } else {
+            Vector2 mousePos = new Vector2(Gdx.input.getX(), Gdx.input.getY());
+            viewport.unproject(mousePos);
+            float playerCenterX = player.position.x + player.getWidth() / 2f;
+            float playerCenterY = player.position.y + player.getHeight() / 2f;
+            float angleRadians = MathUtils.atan2(mousePos.y - playerCenterY, mousePos.x - playerCenterX);
+            player.setAimAngle(angleRadians * MathUtils.radiansToDegrees);
+        }
+
+        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
 
             if (TimeUtils.millis() - player.lastShotTime > player.shootCooldown || true) {
                 spawnBullet();
@@ -297,10 +404,19 @@ public class GameScreen extends ScreenAdapter {
         float spawnOffset = 50f;
 
         switch (edge) {
-            case 0: spawnX = MathUtils.random(camX - halfViewWidth, camX + halfViewWidth); spawnY = camY + halfViewHeight + spawnOffset; break;
-            case 1: spawnX = MathUtils.random(camX - halfViewWidth, camX + halfViewWidth); spawnY = camY - halfViewHeight - spawnOffset; break;
-            case 2: spawnX = camX - halfViewWidth - spawnOffset; spawnY = MathUtils.random(camY - halfViewHeight, camY + halfViewHeight); break;
-            case 3: spawnX = camX + halfViewWidth + spawnOffset; spawnY = MathUtils.random(camY - halfViewHeight, camY + halfViewHeight); break;
+            case 0:
+                spawnX = MathUtils.random(camX - halfViewWidth, camX + halfViewWidth);
+                spawnY = camY + halfViewHeight + spawnOffset;
+                break;
+            case 1: spawnX = MathUtils.random(camX - halfViewWidth, camX + halfViewWidth);
+                spawnY = camY - halfViewHeight - spawnOffset;
+                break;
+            case 2: spawnX = camX - halfViewWidth - spawnOffset;
+                spawnY = MathUtils.random(camY - halfViewHeight, camY + halfViewHeight);
+                break;
+            case 3: spawnX = camX + halfViewWidth + spawnOffset;
+                spawnY = MathUtils.random(camY - halfViewHeight, camY + halfViewHeight);
+                break;
         }
 
         Enemy enemy = new Enemy(enemyAnim, new Vector2(spawnX, spawnY));
@@ -410,6 +526,8 @@ public class GameScreen extends ScreenAdapter {
         healthLabel.setText("Health: " + player.health + "/" + player.maxHealth);
         levelLabel.setText("Level: " + player.level);
         xpLabel.setText("XP: " + player.xp + "/" + player.xpToNextLevel);
+        autoAimStatusLabel.setText("Auto-Aim: " + (autoAimEnabled ? "ON" : "OFF"));
+
 
         if (isPaused && !gameOver) {
             messagesTable.setVisible(true);
@@ -495,29 +613,6 @@ public class GameScreen extends ScreenAdapter {
         if (player != null) player.drawHealthBar(shapeRenderer);
         for (Enemy enemy : enemies) enemy.drawHealthBar(shapeRenderer);
         shapeRenderer.end();
-//
-//        batch.begin();
-//        font.draw(batch, "Score: " + score, 20, viewport.getScreenHeight() - 20);
-//        font.draw(batch, String.format("Time: %02d:%02d", (int)(gameTimer / 60), (int)(gameTimer % 60)), viewport.getScreenWidth() - 150, viewport.getScreenHeight() - 20);
-//        if (player != null) {
-//            font.draw(batch, "Level: " + player.level + " XP: " + player.xp + "/" + player.xpToNextLevel, 20, viewport.getScreenHeight() - 50);
-//            font.draw(batch, "Health: " + player.health + "/" + player.maxHealth, 20, viewport.getScreenHeight() - 80);
-//        }
-//
-//        if (isPaused && !gameOver) {
-//            font.draw(batch, "PAUSED (Press " + ControlsManager.getKeyNameForAction(GameAction.PAUSE) + " or ESC to resume)", viewport.getScreenWidth() / 2f - 200, viewport.getScreenHeight() / 2f);
-//        }
-//        if (gameOver) {
-//            String outcome = (gameTimer >= MAX_GAME_TIME) ? "YOU SURVIVED!" : "GAME OVER";
-//            font.draw(batch, outcome, viewport.getScreenWidth() / 2f - 100, viewport.getScreenHeight() / 2f + 50);
-//            font.draw(batch, "Final Score: " + score, viewport.getScreenWidth() / 2f - 100, viewport.getScreenHeight() / 2f);
-//            font.draw(batch, "Press R to Restart", viewport.getScreenWidth() / 2f - 100, viewport.getScreenHeight() / 2f - 50);
-//            if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {//TODO
-//                main.setScreen(new GameScreen(main));
-//                dispose();
-//            }
-//        }
-//        batch.end();
 
         // Render UI
         updateUILabels();
@@ -541,9 +636,25 @@ public class GameScreen extends ScreenAdapter {
 
     @Override
     public void dispose() {
+        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
+        if (customCursor != null) {
+            customCursor.dispose(); // Dispose the custom cursor object
+            customCursor = null;
+        }
+
         enemies.clear();
         bullets.clear();
         xpOrbs.clear();
+    }
+
+    @Override
+    public void hide() {
+        Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
+        if (customCursor != null) {
+            customCursor.dispose(); // Dispose the custom cursor object
+            customCursor = null;
+        }
+        Gdx.input.setInputProcessor(null);
     }
 }
 
