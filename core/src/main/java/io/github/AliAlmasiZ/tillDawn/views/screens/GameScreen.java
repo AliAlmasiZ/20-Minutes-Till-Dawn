@@ -2,7 +2,6 @@ package io.github.AliAlmasiZ.tillDawn.views.screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
@@ -21,21 +20,17 @@ import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
-import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import io.github.AliAlmasiZ.tillDawn.Main;
 import io.github.AliAlmasiZ.tillDawn.controllers.utils.ControlsManager;
-import io.github.AliAlmasiZ.tillDawn.models.DataBase.AppData;
 import io.github.AliAlmasiZ.tillDawn.models.Entities.Bullet;
 import io.github.AliAlmasiZ.tillDawn.models.Entities.Enemy;
+import io.github.AliAlmasiZ.tillDawn.models.Entities.Tree;
 import io.github.AliAlmasiZ.tillDawn.models.Entities.XPOrb;
 import io.github.AliAlmasiZ.tillDawn.models.GameAssetManager;
 import io.github.AliAlmasiZ.tillDawn.models.Player;
 import io.github.AliAlmasiZ.tillDawn.models.enums.GameAction;
-
-
-import java.util.Map;
 
 public class GameScreen extends ScreenAdapter {
     private final Main main;
@@ -44,18 +39,40 @@ public class GameScreen extends ScreenAdapter {
     private Viewport viewport;
 
     private Player player;
-    private Texture playerTexture;
-    private Animation<TextureRegion> enemyAnim;
+
+    private Texture treeTexture;
+    private Animation<TextureRegion> tentacleMonsterAnim;
+    private Animation<TextureRegion> eyebatAnim;
+    private Animation<TextureRegion> elderBossAnim;
+
+
+
+//    private Texture playerTexture;
+//    private Animation<TextureRegion> enemyAnim;
     private Texture bulletTexture;
     private Texture xpOrbTexture;
     private Texture backgroundTexture;
 
+    Array<Tree> trees;
     private Array<Enemy> enemies;
-    private Array<Bullet> bullets;
+    private Array<Bullet> playerBullets;
+    private Array<Bullet> enemyBullets;
     private Array<XPOrb> xpOrbs;
 
-    private long lastEnemySpawnTime;
-    private float enemySpawnInterval = 2000;
+    // Spawning timers
+//    private long lastEnemySpawnTime;
+    private long lastTentacleSpawnTime;
+    private float tentacleMonsterSpawnRate = 3000;
+    private static final float TENTACLE_MONSTER_SPAWN_DELAY = 2000;
+
+    private long lastEyebatSpawnTime;
+    private float eyebatSpawnRate = 10000;
+    private boolean canSpawnEyebats = false;
+
+    private boolean elderBossHasSpawned = false;
+
+
+//    private float enemySpawnInterval = 2000;
 
     private BitmapFont font;
     private ShapeRenderer shapeRenderer;
@@ -81,6 +98,8 @@ public class GameScreen extends ScreenAdapter {
     private Label healthLabel;
     private Label levelLabel;
     private Label xpLabel;
+    private Label weaponLabel;
+    private Label ammoLabel;
     private Label pauseMessageLabel;
     private Label gameOverMessageLabel;
     private Label finalScoreLabel;
@@ -112,13 +131,14 @@ public class GameScreen extends ScreenAdapter {
         camera = new OrthographicCamera();
         viewport = new ScreenViewport(camera);
         camera.setToOrtho(false, GAME_WORLD_WIDTH, GAME_WORLD_HEIGHT);
-
         Gdx.input.setCursorCatched(false);
 
 
 
-        playerTexture = new Texture(GameAssetManager.getGameAssetManager().getCharacter1Idle0());
-        enemyAnim = GameAssetManager.getGameAssetManager().brainMonsterAnim;
+        treeTexture = GameAssetManager.getGameAssetManager()//TODO
+        tentacleMonsterAnim = GameAssetManager.getGameAssetManager().brainMonsterAnim;
+        eyebatAnim = GameAssetManager.getGameAssetManager()//TODO
+        elderBossAnim = GameAssetManager.getGameAssetManager()//TODO
         bulletTexture = GameAssetManager.getGameAssetManager().bulletTex;
         xpOrbTexture = GameAssetManager.getGameAssetManager().xpOrbTex;
         backgroundTexture = GameAssetManager.getGameAssetManager().backgroundTileTex;
@@ -128,8 +148,6 @@ public class GameScreen extends ScreenAdapter {
         //TODO : Temp for test
         player = new Player();
 //        player = AppData.getAppData().activeUser.getPlayer();
-        player.getPosition().set(GAME_WORLD_WIDTH / 2f - playerTexture.getWidth() / 2f,
-            GAME_WORLD_HEIGHT / 2f - playerTexture.getHeight() / 2f);
 
         if (player != null) {
             float pWidth = player.getWidth();
@@ -140,12 +158,14 @@ public class GameScreen extends ScreenAdapter {
             );
             player.update(0);
         }
-
+        trees = new Array<>();
         enemies = new Array<>();
-        bullets = new Array<>();
+        playerBullets = new Array<>();
+        enemyBullets = new Array<>();
         xpOrbs = new Array<>();
         shapeRenderer = new ShapeRenderer();
 
+        spawnInitialTrees(10);
 
 
         FreeTypeFontGenerator generator = null;
@@ -179,6 +199,8 @@ public class GameScreen extends ScreenAdapter {
         healthLabel = new Label("Health: 100/100", labelStyle);
         levelLabel = new Label("Level: 1", labelStyle);
         xpLabel = new Label("XP: 0/100", labelStyle);
+        weaponLabel = new Label("Weapon: REVOLVER", labelStyle);
+        ammoLabel = new Label("Ammo: 6/6", labelStyle);
         autoAimStatusLabel = new Label("Auto-Aim: OFF", labelStyle);
 
         pauseMessageLabel = new Label("PAUSED (Press " + ControlsManager.getKeyNameForAction(GameAction.PAUSE) + " or ESC to resume)", labelStyle);
@@ -197,6 +219,8 @@ public class GameScreen extends ScreenAdapter {
         statsTable.add(healthLabel).left().row();
         statsTable.add(levelLabel).left().row();
         statsTable.add(xpLabel).left().row();
+        statsTable.add(weaponLabel).left().padTop(5).row();
+        statsTable.add(ammoLabel).left().row();
         statsTable.add(autoAimStatusLabel).left().padTop(5).row();
 
 
@@ -233,8 +257,19 @@ public class GameScreen extends ScreenAdapter {
             cursorPixmap = null;
         }
 
-        lastEnemySpawnTime = TimeUtils.millis();
+        lastTentacleSpawnTime = TimeUtils.millis() - (long)tentacleMonsterSpawnRate + (long)TENTACLE_MONSTER_SPAWN_DELAY; // Start spawning soon after delay
+        lastEyebatSpawnTime = TimeUtils.millis();
+        canSpawnEyebats = false;
+        elderBossHasSpawned = false;
+    }
 
+    private void spawnInitialTrees(int count) {
+        Tree test = new Tree(treeTexture, new Vector2(0, 0));
+        for (int i = 0; i < count; i++) {
+            float x = MathUtils.random(0, GAME_WORLD_WIDTH - test.getWidth());
+            float y = MathUtils.random(0, GAME_WORLD_HEIGHT - test.getHeight());
+            trees.add(new Tree(treeTexture, new Vector2(x, y)));
+        }
     }
 
     private Enemy findNearestEnemy() {
@@ -276,10 +311,13 @@ public class GameScreen extends ScreenAdapter {
             Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             isPaused = !isPaused;
         }
-
         if(Gdx.input.isKeyJustPressed(ControlsManager.getKeyForAction(GameAction.TOGGLE_AUTO_AIM))) {
             autoAimEnabled = !autoAimEnabled;
             Gdx.app.log("GameScreen", "Auto-aim " + (autoAimEnabled ? "enabled" : "disabled"));
+        }
+
+        if (player != null && Gdx.input.isKeyJustPressed(ControlsManager.getKeyForAction(GameAction.RELOAD))) {
+            player.startReload();
         }
 
         if(isPaused) {
@@ -293,7 +331,6 @@ public class GameScreen extends ScreenAdapter {
         boolean movedX = false;
         boolean movedY = false;
         float moveSpeed = player.getSpeed() * delta;
-
         if (Gdx.input.isKeyPressed(ControlsManager.getKeyForAction(GameAction.MOVE_UP))) {
             player.position.y += moveSpeed;
             movedY = true;
@@ -310,7 +347,6 @@ public class GameScreen extends ScreenAdapter {
             player.position.x += moveSpeed;
             movedX = true;
         }
-
         player.isMoving = movedX || movedY;
 
 //        Vector2 mousePos = new Vector2(Gdx.input.getX(), Gdx.input.getY());
@@ -328,51 +364,35 @@ public class GameScreen extends ScreenAdapter {
         if (autoAimEnabled) {
             Enemy targetEnemy = findNearestEnemy();
             if (targetEnemy != null) {
-                float playerCenterX = player.position.x + player.getWidth() / 2f;
-                float playerCenterY = player.position.y + player.getHeight() / 2f;
-                float enemyCenterX = targetEnemy.position.x + targetEnemy.getWidth() / 2f;
-                float enemyCenterY = targetEnemy.position.y + targetEnemy.getHeight() / 2f;
-
-                float angleRadians = MathUtils.atan2(enemyCenterY - playerCenterY, enemyCenterX - playerCenterX);
-                player.setAimAngle(angleRadians * MathUtils.radiansToDegrees);
-
-                // --- MOVE OS CURSOR ---
-                Vector2 enemyScreenPos = new Vector2(enemyCenterX, enemyCenterY);
-//                viewport.project(enemyScreenPos);
-                Vector2 enemyViewportScreenPos = viewport.project(new Vector2(enemyScreenPos)); // Use a new vector to avoid modifying original
-
-                int screenX = (int) enemyViewportScreenPos.x;
-                int screenY = Gdx.graphics.getHeight() - (int) enemyViewportScreenPos.y;
-//                Gdx.input.setCursorPosition(screenX, screenY);
-                Gdx.app.log("AutoAimCursor", "Targeting enemy at world (" + enemyCenterX + ", " + enemyCenterY +
-                    "), projected to viewport screen (" + enemyViewportScreenPos.x + ", " + enemyViewportScreenPos.y +
-                    "), setting OS cursor to (" + screenX + ", " + screenY + ")");
-                Gdx.input.setCursorPosition(screenX, screenY);
-                // --- END MOVE OS CURSOR ---
-
-
+                float pCenterX = player.position.x + player.getWidth() / 2f, pCenterY = player.position.y + player.getHeight() / 2f;
+                float eCenterX = targetEnemy.position.x + targetEnemy.getWidth() / 2f, eCenterY = targetEnemy.position.y + targetEnemy.getHeight() / 2f;
+                player.setAimAngle(MathUtils.atan2(eCenterY - pCenterY, eCenterX - pCenterX) * MathUtils.radiansToDegrees);
+                Vector2 enemyScreenPos = gameViewport.project(new Vector2(eCenterX, eCenterY));
+                Gdx.input.setCursorPosition((int) enemyScreenPos.x, Gdx.graphics.getHeight() - (int) enemyScreenPos.y);
             } else {
-                Vector2 mousePos = new Vector2(Gdx.input.getX(), Gdx.input.getY());
-                viewport.unproject(mousePos);
-                float playerCenterX = player.position.x + player.getWidth() / 2f;
-                float playerCenterY = player.position.y + player.getHeight() / 2f;
-                float angleRadians = MathUtils.atan2(mousePos.y - playerCenterY, mousePos.x - playerCenterX);
-                player.setAimAngle(angleRadians * MathUtils.radiansToDegrees);
+                manualAim();
             }
         } else {
-            Vector2 mousePos = new Vector2(Gdx.input.getX(), Gdx.input.getY());
-            viewport.unproject(mousePos);
-            float playerCenterX = player.position.x + player.getWidth() / 2f;
-            float playerCenterY = player.position.y + player.getHeight() / 2f;
-            float angleRadians = MathUtils.atan2(mousePos.y - playerCenterY, mousePos.x - playerCenterX);
-            player.setAimAngle(angleRadians * MathUtils.radiansToDegrees);
+            manualAim();
         }
 
-        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+//        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
+//
+//            if (TimeUtils.millis() - player.lastShotTime > player.shootCooldown || true) {
+//                spawnBullet();
+//                player.lastShotTime = TimeUtils.millis();
+//            }
+//        }
 
-            if (TimeUtils.millis() - player.lastShotTime > player.shootCooldown || true) {
-                spawnBullet();
+        if (Gdx.input.isButtonPressed(ControlsManager.getKeyForAction(GameAction.SHOOT))) { // isButtonPressed for continuous fire
+            if (player.canShoot() && TimeUtils.millis() - player.lastShotTime > player.shootCooldown) {
+                spawnPlayerBullet();
                 player.lastShotTime = TimeUtils.millis();
+                if (!player.isReloading) player.currentAmmo--; // Decrement ammo if not reloading
+                if (player.currentAmmo == 0 && !player.isReloading) {
+                    // TODO: auto-reload when clip is empty
+                    // player.startReload();
+                }
             }
         }
 
@@ -381,7 +401,15 @@ public class GameScreen extends ScreenAdapter {
         }
     }
 
-    private void spawnBullet() {
+    private void manualAim() {
+        Vector2 mousePos = new Vector2(Gdx.input.getX(), Gdx.input.getY());
+        viewport.unproject(mousePos);
+        float pCenterX = player.position.x + player.getWidth() / 2f;
+        float pCenterY = player.position.y + player.getHeight() / 2f;
+        player.setAimAngle(MathUtils.atan2(mousePos.y - pCenterY, mousePos.x - pCenterX) * MathUtils.radiansToDegrees);
+    }
+
+    private void spawnPlayerBullet() {
         if (player == null) return;
         Vector2 mousePos = new Vector2(Gdx.input.getX(), Gdx.input.getY());
         viewport.unproject(mousePos);
@@ -390,8 +418,8 @@ public class GameScreen extends ScreenAdapter {
         float playerCenterY = player.position.y + player.getHeight() / 2f;
 
         float angleRad = MathUtils.atan2(mousePos.y - playerCenterY, mousePos.x - playerCenterX);
-        Bullet bullet = new Bullet(bulletTexture, new Vector2(playerCenterX, playerCenterY), angleRad);
-        bullets.add(bullet);
+        Bullet bullet = new Bullet(bulletTexture, new Vector2(playerCenterX, playerCenterY), angleRad, );
+        playerBullets.add(bullet);
     }
 
     private void spawnEnemy() {
@@ -441,11 +469,11 @@ public class GameScreen extends ScreenAdapter {
         }
         if(player != null) player.update(delta);
 
-        for(int i = bullets.size - 1; i >= 0; i--) {
-            Bullet bullet = bullets.get(i);
+        for(int i = playerBullets.size - 1; i >= 0; i--) {
+            Bullet bullet = playerBullets.get(i);
             bullet.update(delta);
             if(bullet.isOffScreen(camera, viewport)) {
-                bullets.removeIndex(i);
+                playerBullets.removeIndex(i);
             }
         }
 
@@ -473,13 +501,13 @@ public class GameScreen extends ScreenAdapter {
         if(player == null) return;
         Rectangle playerBounds = player.getBounds();
 
-        for (int i = bullets.size - 1; i >= 0; i--) {
-            Bullet bullet = bullets.get(i);
+        for (int i = playerBullets.size - 1; i >= 0; i--) {
+            Bullet bullet = playerBullets.get(i);
             Rectangle bulletBounds = bullet.getBounds();
             for (int j = enemies.size - 1; j >= 0 ; j--) {
                 Enemy enemy = enemies.get(j);
                 if(bulletBounds.overlaps(enemy.getBounds())) {
-                    bullets.removeIndex(i);
+                    playerBullets.removeIndex(i);
                     enemy.takeDamage(player.damage);
                     if(enemy.health <= 0) {
                         Vector2 enemyPosition = new Vector2(enemies.get(j).position);
@@ -606,7 +634,7 @@ public class GameScreen extends ScreenAdapter {
         for (XPOrb orb : xpOrbs) orb.draw(batch);
         for (Enemy enemy : enemies) enemy.draw(batch);
         if(player != null) player.draw(batch);
-        for(Bullet bullet : bullets) bullet.draw(batch);
+        for(Bullet bullet : playerBullets) bullet.draw(batch);
         batch.end();
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
@@ -643,7 +671,7 @@ public class GameScreen extends ScreenAdapter {
         }
 
         enemies.clear();
-        bullets.clear();
+        playerBullets.clear();
         xpOrbs.clear();
     }
 
