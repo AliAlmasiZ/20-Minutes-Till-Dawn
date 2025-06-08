@@ -21,12 +21,11 @@ public class GameAssetManager {
     public Animation<TextureRegion> characterIdleAnim;
     public Animation<TextureRegion> characterRunAnim;
     public Animation<TextureRegion> brainMonsterAnim;
+    public Animation<TextureRegion> eyebatMonsterAnim;
+    public Animation<TextureRegion> elderBossAnim;
 
 
-    //Textures
-    public Texture xpOrbTex;
-    public Texture bulletTex;
-    public Texture backgroundTileTex;
+
 
 
     //Paths
@@ -50,13 +49,36 @@ public class GameAssetManager {
     private final String brainMonster2 = "Images/Sprite/BrainMonster_2.png";
     private final String brainMonster3 = "Images/Sprite/BrainMonster_3.png";
 
+    private final String eyebatMonster0 = "Images/Sprite/EyeMonster_0.png";
+    private final String eyebatMonster1 = "Images/Sprite/EyeMonster_1.png";
+    private final String eyebatMonster2 = "Images/Sprite/EyeMonster_2.png";
+
+
+    private final String hasturBoss0 = "Images/Sprite/T_HasturBoss_0.png";
+    private final String hasturBoss1 = "Images/Sprite/T_HasturBoss_1.png";
+    private final String hasturBoss2 = "Images/Sprite/T_HasturBoss_2.png";
+    private final String hasturBoss3 = "Images/Sprite/T_HasturBoss_3.png";
+    private final String hasturBoss4 = "Images/Sprite/T_HasturBoss_4.png";
+    private final String hasturBoss5 = "Images/Sprite/T_HasturBoss_5.png";
+
+
+
+
     //Other entities
+    private final String tree = "Images/Sprite/T_TreeMonster_0.png";
     private final String bullet = "bullet.png";
     private final String xpOrb = "Images/Texture2D/T_SmallCircle.png";
     private final String backgroundTile = "Images/Sprite/T_TempleTile_3.png";
 
 
 
+
+
+    //Textures
+    public Texture xpOrbTex;
+    public Texture bulletTex;
+    public Texture backgroundTileTex;
+    public Texture treeTex = new Texture(tree);
 
 
 
@@ -91,6 +113,15 @@ public class GameAssetManager {
         manager.load(brainMonster1, Texture.class);
         manager.load(brainMonster2, Texture.class);
         manager.load(brainMonster3, Texture.class);
+        manager.load(eyebatMonster0, Texture.class);
+        manager.load(eyebatMonster1, Texture.class);
+        manager.load(eyebatMonster2, Texture.class);
+        manager.load(hasturBoss0, Texture.class);
+        manager.load(hasturBoss1, Texture.class);
+        manager.load(hasturBoss2, Texture.class);
+        manager.load(hasturBoss3, Texture.class);
+        manager.load(hasturBoss4, Texture.class);
+        manager.load(hasturBoss5, Texture.class);
 
         manager.load(xpOrb, Texture.class);
         manager.load(bullet, Texture.class);
@@ -124,6 +155,21 @@ public class GameAssetManager {
         brainMonsterFrames.add(new TextureRegion(manager.get(brainMonster2, Texture.class)));
         brainMonsterFrames.add(new TextureRegion(manager.get(brainMonster3, Texture.class)));
 
+        Array<TextureRegion> eyebatFrames = new Array<>();
+        eyebatFrames.add(new TextureRegion(manager.get(eyebatMonster0, Texture.class)));
+        eyebatFrames.add(new TextureRegion(manager.get(eyebatMonster1, Texture.class)));
+        eyebatFrames.add(new TextureRegion(manager.get(eyebatMonster2, Texture.class)));
+
+        Array<TextureRegion> elderBossFrames = new Array<>();
+        elderBossFrames.add(new TextureRegion(manager.get(hasturBoss0, Texture.class)));
+        elderBossFrames.add(new TextureRegion(manager.get(hasturBoss1, Texture.class)));
+        elderBossFrames.add(new TextureRegion(manager.get(hasturBoss2, Texture.class)));
+        elderBossFrames.add(new TextureRegion(manager.get(hasturBoss3, Texture.class)));
+        elderBossFrames.add(new TextureRegion(manager.get(hasturBoss4, Texture.class)));
+        elderBossFrames.add(new TextureRegion(manager.get(hasturBoss5, Texture.class)));
+
+
+
 
         // create Textures
         xpOrbTex = manager.get(xpOrb, Texture.class);
@@ -133,6 +179,8 @@ public class GameAssetManager {
         characterIdleAnim = new Animation<>(0.1f, idleFrames, Animation.PlayMode.LOOP);
         characterRunAnim = new Animation<>(0.1f, runFrames, Animation.PlayMode.LOOP);
         brainMonsterAnim = new Animation<>(0.1f, brainMonsterFrames, Animation.PlayMode.LOOP);
+        eyebatMonsterAnim = new Animation<>(0.1f, eyebatFrames, Animation.PlayMode.LOOP);
+        elderBossAnim = new Animation<>(0.1f, elderBossFrames, Animation.PlayMode.LOOP);
     }
 
     public void dispose() {

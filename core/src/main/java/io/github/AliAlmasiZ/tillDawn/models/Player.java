@@ -10,14 +10,18 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.ObjectSet;
 import com.badlogic.gdx.utils.TimeUtils;
+import io.github.AliAlmasiZ.tillDawn.models.enums.AbilityType;
+import io.github.AliAlmasiZ.tillDawn.models.enums.WeaponType;
 
 public class Player {
     public Vector2 position;
-    public float speed = 200f;
-    public int health = 100;
+    public float baseSpeed = 200f;
+    public float speed;
+    public int health ;
     public int maxHealth = 100;
-    public int damage = 10;
+//    public int damage = 10;
 
     private Sprite sprite;
     private Animation<TextureRegion> walkAnimation;
@@ -25,7 +29,6 @@ public class Player {
     private float stateTime = 0f;
     public boolean isMoving = false;
     private float aimAngleDegrees = 0f;
-    public static final float PLAYER_SCALE = 1.5f;
 
     public Rectangle bounds;
 //////////////////////////////////////////////////////////
@@ -37,30 +40,118 @@ public class Player {
     public int xpToNextLevel = 100;
 
     public long lastShotTime = 0;
-    public float shootCooldown = 300;
+    public float shootCooldown = 200;
 
     public long lastHitTime = 0;
     public long invincibilityDuration = 1000;
 
+    //Weapon
+    public WeaponType currentWeapon;
+    public int currentAmmo;
+    public int currentMaxAmmo;
+    public int baseWeaponDamage;
+    public int projectilesPerShot;
+    public float weaponReloadTime;
+    public boolean isReloading = false;
+    private long reloadStartTime;
+
+    //Abilities
+    private ObjectSet<AbilityType> permanentAbilities;
+    private float damageBoostEndTime = 0;
+    private float speedBoostEndTime = 0;
+    private static final float BUFF_DURATION = 10000;
+
 
     public Player() {
-        position = new Vector2();
+        this.position = new Vector2();
+        this.permanentAbilities = new ObjectSet<>();
+        this.speed = baseSpeed;
 
         this.idleAnimation = GameAssetManager.getGameAssetManager().getCharacterIdleAnim(); // Get idle animation
         this.walkAnimation = GameAssetManager.getGameAssetManager().getCharacterRunAnim();
 
         TextureRegion textureRegion = this.idleAnimation.getKeyFrame(0);
-        this.sprite = new Sprite();
+        this.sprite = new Sprite(textureRegion);
         this.sprite.setOriginCenter();
         this.sprite.setSize(textureRegion.getRegionWidth() * 3, textureRegion.getRegionHeight() * 3);
-//        this.sprite.setScale(PLAYER_SCALE);
+
         this.bounds = new Rectangle(); // Will be set in update()
 
+        equipWeapon(WeaponType.REVOLVER); // Start with revolver
+        this.health = this.maxHealth;
+
     }
+
+    public void equipWeapon(WeaponType weaponType) {
+        this.currentWeapon = weaponType;
+        this.baseWeaponDamage = weaponType.damage;
+        this.projectilesPerShot = weaponType.projectilesPerShot;
+        this.currentMaxAmmo = weaponType.maxAmmo;
+        this.currentAmmo = this.currentMaxAmmo;
+        this.weaponReloadTime = weaponType.reloadTimeMillis;
+        this.isReloading = false;
+
+
+        if (permanentAbilities.contains(AbilityType.AMOCREASE)) {
+            this.currentMaxAmmo += 5;
+            this.currentAmmo = Math.min(this.currentAmmo, this.currentMaxAmmo); // Adjust current ammo if it exceeds new max
+        }
+//        Gdx.app.log("Player", "Equipped " + weaponType.name() + ". Ammo: " + currentAmmo + "/" + currentMaxAmmo);
+    }
+
+    public void startReload() {
+        if (!isReloading && currentAmmo < currentMaxAmmo) {
+            isReloading = true;
+            reloadStartTime = TimeUtils.millis();
+            Gdx.app.log("Player", "Reloading " + currentWeapon.name() + "...");
+        }
+    }
+
+    private void finishReload() {
+        currentAmmo = currentMaxAmmo;
+        isReloading = false;
+        Gdx.app.log("Player", currentWeapon.name() + " reloaded. Ammo: " + currentAmmo + "/" + currentMaxAmmo);
+    }
+
+    public boolean canShoot() {
+        return !isReloading && currentAmmo > 0;
+    }
+
+    public int getEffectiveDamage() {
+        float damageMultiplier = 1.0f;
+        if (TimeUtils.millis() < damageBoostEndTime) {
+            damageMultiplier += 0.25f; // DAMAGER ability: +25%
+        }
+        return (int)(baseWeaponDamage * damageMultiplier);
+    }
+
+
 
     public void update(float delta) {
         stateTime += delta; // Increment stateTime for both animations
         TextureRegion currentRegion = null;
+
+
+        if(isReloading) {
+            if(TimeUtils.millis() - reloadStartTime >= weaponReloadTime) {
+                finishReload();
+            }
+        }
+
+        if (TimeUtils.millis() >= damageBoostEndTime && damageBoostEndTime != 0) {
+            damageBoostEndTime = 0;
+            Gdx.app.log("Player", "Damage boost expired.");
+        }
+        if (TimeUtils.millis() >= speedBoostEndTime && speedBoostEndTime != 0) {
+            speed = baseSpeed;
+            speedBoostEndTime = 0;
+            Gdx.app.log("Player", "Speed boost expired. Speed: " + speed);
+        } else if (speedBoostEndTime != 0) {
+            speed = baseSpeed * 2f;
+        } else {
+            speed = baseSpeed;
+        }
+
 
         if (isMoving && walkAnimation != null) {
             currentRegion = walkAnimation.getKeyFrame(stateTime, true);
@@ -69,10 +160,8 @@ public class Player {
         } else if (walkAnimation != null) { // Fallback if only walk animation exists
             currentRegion = walkAnimation.getKeyFrame(stateTime, true);
         }
-        // Else, currentRegion remains null if no animations are loaded.
 
         if (currentRegion != null) {
-            // Check if the region has changed before setting it, to potentially optimize
             boolean regionChanged = sprite.getTexture() != currentRegion.getTexture() ||
                 sprite.getRegionX() != currentRegion.getRegionX() ||
                 sprite.getRegionY() != currentRegion.getRegionY() ||
@@ -84,8 +173,7 @@ public class Player {
                 sprite.setOriginCenter();
             }
         } else {
-            // Handle case where no frame could be determined (e.g., assets not loaded)
-            // Gdx.app.debug("Player", "No current animation frame to set for sprite.");
+             Gdx.app.debug("Player", "No current animation frame to set for sprite.");
         }
 
         sprite.setPosition(position.x, position.y);
@@ -94,16 +182,52 @@ public class Player {
         bounds.set(sprite.getX(), sprite.getY(), sprite.getWidth(), sprite.getHeight());
     }
 
+    public void applyAbility(AbilityType ability) {
+        Gdx.app.log("Player", "Applying ability: " + ability.name());
+        switch (ability) {
+            case VITALITY:
+                this.maxHealth += 25;
+                this.health = Math.min(this.health + 25, this.maxHealth);
+                permanentAbilities.add(ability);
+                Gdx.app.log("Player", "VITALITY applied. Max HP: " + maxHealth);
+                break;
+            case DAMAGER:
+                damageBoostEndTime = TimeUtils.millis() + BUFF_DURATION;
+                Gdx.app.log("Player", "DAMAGER applied. Damage boost active.");
+                break;
+            case PROCREASE:
+                this.projectilesPerShot += 1;
+                permanentAbilities.add(ability);
+                Gdx.app.log("Player", "PROCREASE applied. Projectiles per shot: " + projectilesPerShot);
+                break;
+            case AMOCREASE:
+                this.currentMaxAmmo += 5;
+                if (!isReloading) {
+                    this.currentAmmo = Math.min(this.currentAmmo + 5, this.currentMaxAmmo);
+                }
+                permanentAbilities.add(ability);
+                Gdx.app.log("Player", "AMOCREASE applied. Max ammo for " + currentWeapon.name() + ": " + currentMaxAmmo);
+                break;
+            case SPEEDY:
+                this.speed = baseSpeed * 2f;
+                speedBoostEndTime = TimeUtils.millis() + BUFF_DURATION;
+                Gdx.app.log("Player", "SPEEDY applied. Speed: " + speed);
+                break;
+        }
+    }
+
     public void draw(SpriteBatch batch) {
         if (TimeUtils.millis() - lastHitTime < invincibilityDuration) {
             if ((TimeUtils.millis() / 100) % 2 == 0) {
                 return;
             }
         }
-        if (sprite != null) { // Ensure sprite is not null before drawing
+        if (sprite != null) {
             sprite.draw(batch);
         }
     }
+
+
 
     public float getWidth() {
         return sprite != null ? sprite.getWidth() : 0;
@@ -148,19 +272,21 @@ public class Player {
 
     public void levelUp() {
         this.level++;
-        this.xp = 0;
+        this.xp -= this.xpToNextLevel;
+        if(this.xp < 0) this.xp = 0;
         this.xpToNextLevel = (int) (this.xpToNextLevel * 1.5f);
-        this.maxHealth += 20;
-        this.health = this.maxHealth;
-        this.damage += 2;
-        this.speed += 10f;
-        this.shootCooldown = Math.max(100, this.shootCooldown - 20);
+        //ability handle in gameScreen
     }
 
 
     public void setAimAngle(float degrees) {
         this.aimAngleDegrees = degrees;
     }
+
+    public float getAimAngleDegrees() {
+        return this.aimAngleDegrees;
+    }
+
     public void updateStateTime(float delta) {
         stateTime += delta;
     }

@@ -30,7 +30,10 @@ import io.github.AliAlmasiZ.tillDawn.models.Entities.Tree;
 import io.github.AliAlmasiZ.tillDawn.models.Entities.XPOrb;
 import io.github.AliAlmasiZ.tillDawn.models.GameAssetManager;
 import io.github.AliAlmasiZ.tillDawn.models.Player;
+import io.github.AliAlmasiZ.tillDawn.models.enums.AbilityType;
+import io.github.AliAlmasiZ.tillDawn.models.enums.EnemyType;
 import io.github.AliAlmasiZ.tillDawn.models.enums.GameAction;
+import io.github.AliAlmasiZ.tillDawn.models.enums.WeaponType;
 
 public class GameScreen extends ScreenAdapter {
     private final Main main;
@@ -49,7 +52,8 @@ public class GameScreen extends ScreenAdapter {
 
 //    private Texture playerTexture;
 //    private Animation<TextureRegion> enemyAnim;
-    private Texture bulletTexture;
+    private Texture playerBulletTexture;
+    private Texture enemyBulletTexture;
     private Texture xpOrbTexture;
     private Texture backgroundTexture;
 
@@ -135,11 +139,12 @@ public class GameScreen extends ScreenAdapter {
 
 
 
-        treeTexture = GameAssetManager.getGameAssetManager()//TODO
+        treeTexture = GameAssetManager.getGameAssetManager().treeTex;
         tentacleMonsterAnim = GameAssetManager.getGameAssetManager().brainMonsterAnim;
-        eyebatAnim = GameAssetManager.getGameAssetManager()//TODO
-        elderBossAnim = GameAssetManager.getGameAssetManager()//TODO
-        bulletTexture = GameAssetManager.getGameAssetManager().bulletTex;
+        eyebatAnim = GameAssetManager.getGameAssetManager().eyebatMonsterAnim;
+        elderBossAnim = GameAssetManager.getGameAssetManager().elderBossAnim;
+        playerBulletTexture = GameAssetManager.getGameAssetManager().bulletTex;
+        enemyBulletTexture = GameAssetManager.getGameAssetManager().bulletTex;
         xpOrbTexture = GameAssetManager.getGameAssetManager().xpOrbTex;
         backgroundTexture = GameAssetManager.getGameAssetManager().backgroundTileTex;
 
@@ -367,7 +372,7 @@ public class GameScreen extends ScreenAdapter {
                 float pCenterX = player.position.x + player.getWidth() / 2f, pCenterY = player.position.y + player.getHeight() / 2f;
                 float eCenterX = targetEnemy.position.x + targetEnemy.getWidth() / 2f, eCenterY = targetEnemy.position.y + targetEnemy.getHeight() / 2f;
                 player.setAimAngle(MathUtils.atan2(eCenterY - pCenterY, eCenterX - pCenterX) * MathUtils.radiansToDegrees);
-                Vector2 enemyScreenPos = gameViewport.project(new Vector2(eCenterX, eCenterY));
+                Vector2 enemyScreenPos = viewport.project(new Vector2(eCenterX, eCenterY));
                 Gdx.input.setCursorPosition((int) enemyScreenPos.x, Gdx.graphics.getHeight() - (int) enemyScreenPos.y);
             } else {
                 manualAim();
@@ -390,7 +395,7 @@ public class GameScreen extends ScreenAdapter {
                 player.lastShotTime = TimeUtils.millis();
                 if (!player.isReloading) player.currentAmmo--; // Decrement ammo if not reloading
                 if (player.currentAmmo == 0 && !player.isReloading) {
-                    // TODO: auto-reload when clip is empty
+                    // TODO: auto-reload
                     // player.startReload();
                 }
             }
@@ -417,12 +422,59 @@ public class GameScreen extends ScreenAdapter {
         float playerCenterX = player.position.x + player.getWidth() / 2f;
         float playerCenterY = player.position.y + player.getHeight() / 2f;
 
-        float angleRad = MathUtils.atan2(mousePos.y - playerCenterY, mousePos.x - playerCenterX);
-        Bullet bullet = new Bullet(bulletTexture, new Vector2(playerCenterX, playerCenterY), angleRad, );
-        playerBullets.add(bullet);
+        float baseAngleRad = MathUtils.atan2(mousePos.y - playerCenterY, mousePos.x - playerCenterX);
+
+        int effectiveDamage = player.getEffectiveDamage();
+
+        for (int i = 0; i < player.projectilesPerShot; i++) {
+            float currentAngleRad = baseAngleRad;
+            if (player.currentWeapon == WeaponType.SHOTGUN && player.projectilesPerShot > 1) {
+                float spreadRange = 30f;
+                float randomSpread = MathUtils.random(-spreadRange / 2f, spreadRange / 2f);
+                currentAngleRad = baseAngleRad + (randomSpread * MathUtils.degreesToRadians);
+            }
+            // For Dual SMGs, if they are meant to fire from slightly different positions or angles,
+            // that logic would go here too, potentially alternating. For now, they fire like revolver.
+
+            playerBullets.add(new Bullet(playerBulletTexture,
+                new Vector2(playerCenterX, playerCenterY), currentAngleRad, effectiveDamage, true));
+        }
     }
 
-    private void spawnEnemy() {
+
+    public void spawnEnemyBullet(Vector2 startPos, float angleRad, int damage) {
+        enemyBullets.add(new Bullet(enemyBulletTexture, startPos, angleRad, damage, false));
+    }
+
+    private void manageEnemySpawning() {
+        // Tentacle Monster Spawning (HP: 25, Spawn Rate: every 3s spawns i/30 monsters)
+        if (TimeUtils.millis() - lastTentacleSpawnTime > tentacleMonsterSpawnRate) {
+            for(int i = 0; i < gameTimer / 30; i++)
+                spawnNewEnemy(EnemyType.TENTACLE_MONSTER);
+            lastTentacleSpawnTime = TimeUtils.millis();
+        }
+
+        // Eyebat Spawning Logic (HP: 50, Spawn after T/4, then every 10s spawns (4i-T+30) / 30)
+        if (!canSpawnEyebats && gameTimer >= MAX_GAME_TIME / 4.0f) {
+            canSpawnEyebats = true;
+            Gdx.app.log("GameScreen", "Eyebat spawning enabled.");
+            lastEyebatSpawnTime = TimeUtils.millis();
+        }
+        if (canSpawnEyebats && TimeUtils.millis() - lastEyebatSpawnTime > eyebatSpawnRate) {
+            for(int i = 0; i < MathUtils.floor((4 * gameTimer - MAX_GAME_TIME + 30) / 30); i++)
+                spawnNewEnemy(EnemyType.EYEBAT);
+            lastEyebatSpawnTime = TimeUtils.millis();
+        }
+
+        // Elder Boss Spawning (HP: 400, Spawns after T/2)
+        if (!elderBossHasSpawned && gameTimer >= MAX_GAME_TIME / 2.0f) {
+            spawnNewEnemy(EnemyType.ELDER_BOSS);
+            elderBossHasSpawned = true;
+            Gdx.app.log("GameScreen", "ELDER BOSS HAS SPAWNED!");
+        }
+    }
+
+    private void spawnNewEnemy(EnemyType type) {
         float spawnX = 0, spawnY = 0;
         int edge = MathUtils.random(3);
         float camX = camera.position.x;
@@ -430,6 +482,8 @@ public class GameScreen extends ScreenAdapter {
         float halfViewWidth = viewport.getWorldWidth() / 2f;
         float halfViewHeight = viewport.getWorldHeight() / 2f;
         float spawnOffset = 50f;
+
+
 
         switch (edge) {
             case 0:
@@ -447,10 +501,19 @@ public class GameScreen extends ScreenAdapter {
                 break;
         }
 
-        Enemy enemy = new Enemy(enemyAnim, new Vector2(spawnX, spawnY));
+        Animation<TextureRegion> animationToUse = GameAssetManager.getGameAssetManager().brainMonsterAnim;
+
+        if(type == EnemyType.EYEBAT) {
+            //TODO
+        } else if (type == EnemyType.ELDER_BOSS) {
+            //TODO
+        } else if (type == EnemyType.TENTACLE_MONSTER) {
+            animationToUse = GameAssetManager.getGameAssetManager().brainMonsterAnim;
+        }
+
+        Enemy enemy = new Enemy(type, animationToUse, new Vector2(spawnX, spawnY));
         enemies.add(enemy);
-        lastEnemySpawnTime = TimeUtils.millis();
-        enemySpawnInterval *= 0.99f;
+
     }
 
     private void spawnXPOrb(Vector2 position) {
@@ -477,19 +540,27 @@ public class GameScreen extends ScreenAdapter {
             }
         }
 
+        for(int i = enemyBullets.size - 1; i >= 0; i--) {
+            Bullet bullet = enemyBullets.get(i);
+            bullet.update(delta);
+            if(bullet.isOffScreen(camera, viewport)) {
+                enemyBullets.removeIndex(i);
+            }
+        }
+
+
+
         for (Enemy enemy : enemies) {
             if (player != null) {
                 Vector2 playerCenter = new Vector2(
                     player.position.x + player.getWidth() / 2f,
                     player.position.y + player.getHeight() / 2f
                 );
-                enemy.update(delta, playerCenter);
+                enemy.update(delta, playerCenter, this);
             }
         }
+        manageEnemySpawning();
 
-        if (TimeUtils.millis() - lastEnemySpawnTime > enemySpawnInterval) {
-            spawnEnemy();
-        }
 
         for (int i = xpOrbs.size - 1; i >= 0; i--) {
             xpOrbs.get(i).update(delta);
@@ -503,12 +574,13 @@ public class GameScreen extends ScreenAdapter {
 
         for (int i = playerBullets.size - 1; i >= 0; i--) {
             Bullet bullet = playerBullets.get(i);
+            if(bullet == null || !bullet.isPlayerBullet) continue;
             Rectangle bulletBounds = bullet.getBounds();
             for (int j = enemies.size - 1; j >= 0 ; j--) {
                 Enemy enemy = enemies.get(j);
                 if(bulletBounds.overlaps(enemy.getBounds())) {
                     playerBullets.removeIndex(i);
-                    enemy.takeDamage(player.damage);
+                    enemy.takeDamage(bullet.damage);
                     if(enemy.health <= 0) {
                         Vector2 enemyPosition = new Vector2(enemies.get(j).position);
                         enemies.removeIndex(j);
@@ -516,6 +588,18 @@ public class GameScreen extends ScreenAdapter {
                         spawnXPOrb(enemyPosition);
                     }
                     break;
+                }
+            }
+        }
+
+        for(int i = enemyBullets.size - 1; i >= 0; i--) {
+            Bullet bullet = enemyBullets.get(i);
+            if(bullet == null || bullet.isPlayerBullet) return;
+            if (playerBounds.overlaps(bullet.getBounds())) {
+                if (TimeUtils.millis() - player.lastHitTime > player.invincibilityDuration) {
+                    player.takeDamage(bullet.damage);
+                    enemyBullets.removeIndex(i);
+                    if (player.health <= 0) { gameOver = true; return; }
                 }
             }
         }
@@ -533,6 +617,18 @@ public class GameScreen extends ScreenAdapter {
             }
         }
 
+        for (Tree tree : trees) {
+            if(playerBounds.overlaps(tree.getBounds())) {
+                if(TimeUtils.millis() - player.lastHitTime > player.invincibilityDuration) {
+                    player.takeDamage(Tree.TREE_DAMAGE);
+                    if(player.health <= 0) {
+                        gameOver = true;
+                        return;
+                    }
+                }
+            }
+        }
+
         for (int i = xpOrbs.size - 1; i >= 0; i--) {
             XPOrb orb = xpOrbs.get(i);
             if(playerBounds.overlaps(orb.getBounds())) {
@@ -540,6 +636,8 @@ public class GameScreen extends ScreenAdapter {
                 xpOrbs.removeIndex(i);
                 if(player.xp >= player.xpToNextLevel) {
                     player.levelUp();
+                    AbilityType[] allAbilities = AbilityType.values();
+                    player.applyAbility(allAbilities[MathUtils.random(allAbilities.length - 1)]);
                 }
             }
         }
@@ -550,10 +648,13 @@ public class GameScreen extends ScreenAdapter {
         if (player == null || scoreLabel == null) return; // Ensure UI elements are initialized
 
         scoreLabel.setText("Score: " + score);
-        timeLabel.setText(String.format("Time: %02d:%02d", (int)(gameTimer / 60), (int)(gameTimer % 60)));
+        timeLabel.setText(String.format("Remaining Time: %02d:%02d", (int)((MAX_GAME_TIME - gameTimer) / 60), (int)((MAX_GAME_TIME - gameTimer) % 60)));
         healthLabel.setText("Health: " + player.health + "/" + player.maxHealth);
         levelLabel.setText("Level: " + player.level);
         xpLabel.setText("XP: " + player.xp + "/" + player.xpToNextLevel);
+        weaponLabel.setText("Weapon: " + player.currentWeapon.name());
+        String ammoText = player.isReloading ? "Reloading..." : player.currentAmmo + "/" + player.currentMaxAmmo;
+        ammoLabel.setText("Ammo: " + ammoText);
         autoAimStatusLabel.setText("Auto-Aim: " + (autoAimEnabled ? "ON" : "OFF"));
 
 
@@ -595,6 +696,7 @@ public class GameScreen extends ScreenAdapter {
 
         Gdx.gl.glClearColor(0.1f, 0.1f, 0.15f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+
         viewport.apply();
         batch.setProjectionMatrix(camera.combined);
         shapeRenderer.setProjectionMatrix(camera.combined);
@@ -630,11 +732,12 @@ public class GameScreen extends ScreenAdapter {
         }
         //--------------------------
 
-
+        for (Tree tree : trees) tree.draw(batch);
         for (XPOrb orb : xpOrbs) orb.draw(batch);
         for (Enemy enemy : enemies) enemy.draw(batch);
         if(player != null) player.draw(batch);
         for(Bullet bullet : playerBullets) bullet.draw(batch);
+        for (Bullet bullet : enemyBullets) bullet.draw(batch);
         batch.end();
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
