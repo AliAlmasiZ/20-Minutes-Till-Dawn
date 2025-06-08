@@ -353,8 +353,8 @@ public class GameScreen extends ScreenAdapter {
             player.startReload();
         }
 
-        if(isPaused) {
-            if(player != null) player.setMoving(false);
+        if (isPaused || gameOver || player == null) {
+            if (player != null) player.isMoving = false;
             return;
         }
 
@@ -429,6 +429,8 @@ public class GameScreen extends ScreenAdapter {
             }
         }
 
+
+        //Cheats
         if (Gdx.input.isKeyJustPressed(Input.Keys.F1)) {
             player.health = player.maxHealth;
         }
@@ -436,7 +438,9 @@ public class GameScreen extends ScreenAdapter {
             gameTimer += 60;
         }
         if(Gdx.input.isKeyJustPressed(Input.Keys.F3)) {
-            player.gainXP(player.xpToNextLevel - player.xp + 1);
+            player.levelUp();
+            AbilityType[] allAbilities = AbilityType.values();
+            player.applyAbility(allAbilities[MathUtils.random(allAbilities.length - 1)]);
         }
     }
 
@@ -538,9 +542,9 @@ public class GameScreen extends ScreenAdapter {
         Animation<TextureRegion> animationToUse = GameAssetManager.getGameAssetManager().brainMonsterAnim;
 
         if(type == EnemyType.EYEBAT) {
-            //TODO
+            animationToUse = GameAssetManager.getGameAssetManager().eyebatMonsterAnim;
         } else if (type == EnemyType.ELDER_BOSS) {
-            //TODO
+            animationToUse = GameAssetManager.getGameAssetManager().elderBossAnim;
         } else if (type == EnemyType.TENTACLE_MONSTER) {
             animationToUse = GameAssetManager.getGameAssetManager().brainMonsterAnim;
         }
