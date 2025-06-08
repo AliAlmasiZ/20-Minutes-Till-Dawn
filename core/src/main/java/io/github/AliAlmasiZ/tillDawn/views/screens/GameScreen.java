@@ -35,6 +35,9 @@ import io.github.AliAlmasiZ.tillDawn.models.enums.EnemyType;
 import io.github.AliAlmasiZ.tillDawn.models.enums.GameAction;
 import io.github.AliAlmasiZ.tillDawn.models.enums.WeaponType;
 
+import java.util.HashSet;
+
+
 public class GameScreen extends ScreenAdapter {
     private final Main main;
     private SpriteBatch batch;
@@ -62,6 +65,9 @@ public class GameScreen extends ScreenAdapter {
     private Array<Bullet> playerBullets;
     private Array<Bullet> enemyBullets;
     private Array<XPOrb> xpOrbs;
+
+    private HashSet<Long> populatedTreeCells;
+    private static final int TREE_CELL_SIZE = 1600;
 
     // Spawning timers
 //    private long lastEnemySpawnTime;
@@ -170,7 +176,8 @@ public class GameScreen extends ScreenAdapter {
         xpOrbs = new Array<>();
         shapeRenderer = new ShapeRenderer();
 
-        spawnInitialTrees(10);
+        populatedTreeCells = new HashSet<>();
+        spawnTreesAroundPlayer();
 
 
         FreeTypeFontGenerator generator = null;
@@ -268,12 +275,33 @@ public class GameScreen extends ScreenAdapter {
         elderBossHasSpawned = false;
     }
 
-    private void spawnInitialTrees(int count) {
-        Tree test = new Tree(treeTexture, new Vector2(0, 0));
-        for (int i = 0; i < count; i++) {
-            float x = MathUtils.random(0, GAME_WORLD_WIDTH - test.getWidth());
-            float y = MathUtils.random(0, GAME_WORLD_HEIGHT - test.getHeight());
-            trees.add(new Tree(treeTexture, new Vector2(x, y)));
+    private void spawnTreesAroundPlayer() {
+        if (player == null || treeTexture == null) return;
+
+        // Determine the player's current grid cell coordinates
+        int cellX = (int) (player.position.x / TREE_CELL_SIZE);
+        int cellY = (int) (player.position.y / TREE_CELL_SIZE);
+
+        // Check a 3x3 grid of cells around the player
+        for (int y = cellY - 1; y <= cellY + 1; y++) {
+            for (int x = cellX - 1; x <= cellX + 1; x++) {
+                // Create a unique ID for the cell
+                long cellId = (long) x << 32 | (y & 0xffffffffL);
+
+                // If this cell has not been populated yet, spawn trees in it
+                if (!populatedTreeCells.contains(cellId)) {
+                    // Spawn a random number of trees in this cell
+                    int treesToSpawn = MathUtils.random(5, 15); // e.g., 5 to 15 trees per cell
+                    for (int i = 0; i < treesToSpawn; i++) {
+                        float treeX = (x * TREE_CELL_SIZE) + MathUtils.random(0, TREE_CELL_SIZE - treeTexture.getWidth());
+                        float treeY = (y * TREE_CELL_SIZE) + MathUtils.random(0, TREE_CELL_SIZE - treeTexture.getHeight());
+                        trees.add(new Tree(treeTexture, new Vector2(treeX, treeY)));
+                    }
+                    // Mark this cell as populated
+                    populatedTreeCells.add(cellId);
+                    Gdx.app.log("Tree Spawning", "Populated tree cell: (" + x + ", " + y + ")");
+                }
+            }
         }
     }
 
@@ -404,6 +432,12 @@ public class GameScreen extends ScreenAdapter {
         if (Gdx.input.isKeyJustPressed(Input.Keys.F1)) {
             player.health = player.maxHealth;
         }
+        if (Gdx.input.isKeyJustPressed(Input.Keys.F2)) {
+            gameTimer += 60;
+        }
+        if(Gdx.input.isKeyJustPressed(Input.Keys.F3)) {
+            player.gainXP(player.xpToNextLevel - player.xp + 1);
+        }
     }
 
     private void manualAim() {
@@ -530,6 +564,9 @@ public class GameScreen extends ScreenAdapter {
             gameOver = true;
             return;
         }
+
+        spawnTreesAroundPlayer();
+
         if(player != null) player.update(delta);
 
         for(int i = playerBullets.size - 1; i >= 0; i--) {
