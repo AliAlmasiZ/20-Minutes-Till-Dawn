@@ -47,8 +47,8 @@ public class ProfileMenuView {
 
 
         Table details = new Table();
-        Label nameLabel = new Label("Username: " + AppData.getAppData().getActivePlayer().getUsername(), skin);
-        Label scoreLabel = new Label("Score: " + AppData.getAppData().getActivePlayer().getScore(), skin);
+        Label nameLabel = new Label("Username: " + AppData.getAppData().getActiveUser().getUsername(), skin);
+        Label scoreLabel = new Label("Score: " + AppData.getAppData().getActiveUser().getScore(), skin);
         details.add(nameLabel).left().padBottom(10);
 //        details.row();
         details.add(scoreLabel).left().padBottom(20);

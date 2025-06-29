@@ -37,6 +37,8 @@ public class LoginMenuScreen implements Screen {
                 main.setScreen(new SignUpMenuScreen(main));
             }
         });
+
+
     }
 
     @Override

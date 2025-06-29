@@ -6,7 +6,9 @@ import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import io.github.AliAlmasiZ.tillDawn.Main;
+import io.github.AliAlmasiZ.tillDawn.models.DataBase.AppData;
 import io.github.AliAlmasiZ.tillDawn.models.GameAssetManager;
+import io.github.AliAlmasiZ.tillDawn.models.User;
 import io.github.AliAlmasiZ.tillDawn.views.MainMenuView;
 
 public class MainMenuScreen implements Screen {
@@ -21,6 +23,15 @@ public class MainMenuScreen implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 main.setScreen(new ProfileMenuScreen(main));
+                MainMenuScreen.this.dispose();
+            }
+        });
+
+        view.logoutBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                AppData.getAppData().setActiveUser(null);
+                main.setScreen(new LoginMenuScreen(main));
             }
         });
     }

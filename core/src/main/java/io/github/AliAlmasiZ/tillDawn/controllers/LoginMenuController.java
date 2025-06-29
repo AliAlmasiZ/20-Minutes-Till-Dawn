@@ -15,7 +15,7 @@ public class LoginMenuController {
             return new Result(false, "Wrong Password");
         }
 
-        AppData.getAppData().setActivePlayer(user);
+        AppData.getAppData().setActiveUser(user);
         return new Result(true, "logged in successfully");
     }
 }

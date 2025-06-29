@@ -24,7 +24,7 @@ public class Main extends Game {
     public void create() {
         //TODO: for debug uncomment bellow code block :
         /*{
-            AppData.getAppData().setActivePlayer(new User("Ali", "pass", "meow"));
+            AppData.getAppData().setActiveUser(new User("Ali", "pass", "meow"));
         }*/
 
 

@@ -52,7 +52,7 @@ public class LoginMenuView {
 
         //Buttons
         loginButton = new TextButton("Login", skin);
-        backButton = new TextButton("Back", skin);
+        backButton = new TextButton("Sign Up", skin);
 
         Table buttonTable = new Table();
         buttonTable.defaults().pad(10).height(75).width(400);
