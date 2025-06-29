@@ -1,11 +1,8 @@
 package io.github.AliAlmasiZ.tillDawn.views;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.files.FileHandle;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
-import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import io.github.AliAlmasiZ.tillDawn.models.DataBase.AppData;
 
@@ -17,7 +14,7 @@ public class ProfileMenuView {
 
     public final TextButton changeUsernameBtn, changePasswordBtn, deleteAccountBtn, changeAvatarBtn;
 //    public final Image avatarImage;
-    public final TextField messageField;
+    public final Label messageLabel;
 
 
     public ProfileMenuView(Skin skin) {
@@ -45,11 +42,15 @@ public class ProfileMenuView {
 //        avatarImage = new Image(new TextureRegionDrawable(avatarTexture));
 //        avatarImage.setSize(128, 128);
 //        table.add(avatarImage).padRight(30).size(128, 128);
+
+
+
+
         Table details = new Table();
         Label nameLabel = new Label("Username: " + AppData.getAppData().getActivePlayer().getUsername(), skin);
         Label scoreLabel = new Label("Score: " + AppData.getAppData().getActivePlayer().getScore(), skin);
         details.add(nameLabel).left().padBottom(10);
-        details.row();
+//        details.row();
         details.add(scoreLabel).left().padBottom(20);
         details.row();
 
@@ -70,10 +71,10 @@ public class ProfileMenuView {
         table.add(details);
         table.row();
 
-        messageField = new TextField("", skin);
-        messageField.setDisabled(true);
-        messageField.setMessageText("");
-        table.add(messageField).colspan(2).fillX().padTop(20).height(30);
+        messageLabel = new Label("", skin);
+        messageLabel.setVisible(false);
+        messageLabel.setText("");
+        table.add(messageLabel).colspan(2).fillX().padTop(20).height(30);
 
 
     }

@@ -8,7 +8,9 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 import io.github.AliAlmasiZ.tillDawn.controllers.MainMenuController;
+import io.github.AliAlmasiZ.tillDawn.models.DataBase.AppData;
 import io.github.AliAlmasiZ.tillDawn.models.GameAssetManager;
+import io.github.AliAlmasiZ.tillDawn.models.User;
 import io.github.AliAlmasiZ.tillDawn.views.MainMenuView;
 import io.github.AliAlmasiZ.tillDawn.views.screens.GameScreen;
 import io.github.AliAlmasiZ.tillDawn.views.screens.MainMenuScreen;
@@ -20,8 +22,14 @@ public class Main extends Game {
 
     @Override
     public void create() {
+        //TODO: for debug uncomment bellow code block :
+        /*{
+            AppData.getAppData().setActivePlayer(new User("Ali", "pass", "meow"));
+        }*/
+
+
         batch = new SpriteBatch();
-        setScreen(new GameScreen(this));
+        setScreen(new SignUpMenuScreen(this));
     }
 
     @Override

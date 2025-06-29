@@ -15,7 +15,13 @@ import com.badlogic.gdx.utils.TimeUtils;
 import io.github.AliAlmasiZ.tillDawn.models.enums.AbilityType;
 import io.github.AliAlmasiZ.tillDawn.models.enums.WeaponType;
 
-public class Player {
+import javax.persistence.Embedded;
+import javax.persistence.Entity;
+import javax.persistence.Transient;
+import java.io.Serializable;
+
+@Entity
+public class Player implements Serializable {
     public Vector2 position;
     public float baseSpeed = 200f;
     public float speed;
@@ -23,13 +29,17 @@ public class Player {
     public int maxHealth = 100;
 //    public int damage = 10;
 
+    @Transient
     private Sprite sprite;
+    @Transient
     private Animation<TextureRegion> walkAnimation;
+    @Transient
     private Animation<TextureRegion> idleAnimation;
     private float stateTime = 0f;
     public boolean isMoving = false;
     private float aimAngleDegrees = 0f;
 
+    @Transient
     public Rectangle bounds;
 //////////////////////////////////////////////////////////
     public float rotation;

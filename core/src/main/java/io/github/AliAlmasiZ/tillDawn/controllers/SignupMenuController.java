@@ -20,6 +20,13 @@ public class SignupMenuController {
             AppData.getAppData().setActivePlayer(user);
             playerDAO.savePlayer(user);
             return new Result(true, "User with username \"" + username + "\" saved successfully!");
+
+        //TODO: for DEBUG : remove below line and uncomment above lines(after fix save and load users)
+        /*{
+            Result result = new Result(true, "signup error");
+            return result;
+        }*/
+
 //        }
 //        catch (SQLException e) {
 //            e.printStackTrace();

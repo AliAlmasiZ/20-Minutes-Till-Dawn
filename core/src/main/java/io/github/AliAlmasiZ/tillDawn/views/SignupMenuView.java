@@ -4,12 +4,13 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import io.github.AliAlmasiZ.tillDawn.models.Result;
 
 
 public class SignupMenuView {
     private final Stage stage;
     private final Table table;
-    public final Label usernameLabel, passwordLabel;
+    public final Label usernameLabel, passwordLabel, statusMessageLabel;
     public final TextField usernameField, passwordField, /*securityQuestionField,*/ securityAnswerField;
     public final TextButton signupButton, guestButton, loginMenuBtn, forgetPassBtn;
 
@@ -27,6 +28,11 @@ public class SignupMenuView {
         table.pad(40);
 
         stage.addActor(table);
+
+        statusMessageLabel = new Label("", skin);
+        statusMessageLabel.setVisible(false);
+        table.add(statusMessageLabel).colspan(2).pad(20);
+        table.row();
 
         //Title
         Label title = new Label("Create Account", skin);
@@ -104,5 +110,10 @@ public class SignupMenuView {
 
     public void dispose() {
         stage.draw();
+    }
+
+    public void setStatusMessage(Result result) {
+        this.statusMessageLabel.setText(result.message());
+        this.statusMessageLabel.setVisible(!result.isSuccessful());
     }
 }

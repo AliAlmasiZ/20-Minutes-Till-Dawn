@@ -31,11 +31,16 @@ public class SignUpMenuScreen implements Screen {
         view.signupButton.addListener(new ClickListener(){
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                Result result = controller.signup(view.usernameField.getText(), view.passwordField.getText(),
-                    view.securityAnswerField.getText());
+                Result result = controller.signup(
+                    view.usernameField.getText(),
+                    view.passwordField.getText(),
+                    view.securityAnswerField.getText()
+                );
+
+
                 if(result.isSuccessful())
                     main.setScreen(new MainMenuScreen(main));
-                System.out.println(result.message());
+                view.setStatusMessage(result);
             }
         });
 

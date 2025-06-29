@@ -14,6 +14,7 @@ public class User {
     private String securityAnswer;
     private int langID;
     private int score;
+    @Transient
     private Player player;
 
 
@@ -31,6 +32,10 @@ public class User {
         this.player = new Player();
     }
 
+
+    public void loadPlayer() {
+
+    }
 
 
 
@@ -92,5 +97,9 @@ public class User {
 
     public Player getPlayer() {
         return player;
+    }
+
+    public void setPlayer(Player player) {
+        this.player = player;
     }
 }

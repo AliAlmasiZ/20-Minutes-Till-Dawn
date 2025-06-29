@@ -9,7 +9,7 @@ import io.github.AliAlmasiZ.tillDawn.Main;
 import io.github.AliAlmasiZ.tillDawn.models.GameAssetManager;
 import io.github.AliAlmasiZ.tillDawn.views.MainMenuView;
 
-public class MainMenuScreen  implements Screen {
+public class MainMenuScreen implements Screen {
     private final Main main;
     private final MainMenuView view;
 
