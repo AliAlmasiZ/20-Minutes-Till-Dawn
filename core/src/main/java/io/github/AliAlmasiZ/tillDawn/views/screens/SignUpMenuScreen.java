@@ -47,16 +47,12 @@ public class SignUpMenuScreen implements Screen {
         view.guestButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                //TODO
+                controller.guest();
+                main.setScreen(new MainMenuScreen(main));
             }
         });
 
-        view.forgetPassBtn.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
 
-            }
-        });
     }
 
     @Override

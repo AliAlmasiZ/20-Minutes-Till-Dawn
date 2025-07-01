@@ -1,6 +1,7 @@
 package io.github.AliAlmasiZ.tillDawn.views;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.scenes.scene2d.Event;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -8,9 +9,10 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 public class LoginMenuView {
     private Stage stage;
-    private Table table;
-    public TextField usernameField, passwordField;
-    public TextButton loginButton, backButton;
+    private Table mainTable;
+    private Table forgetPassTable;
+    public TextField usernameField, passwordField, securityQuestionField;
+    public TextButton loginButton, signupBtn, forgetPassBtn, submitBtn;
 
     public LoginMenuView(Skin skin) {
         stage = new Stage(new ScreenViewport());
@@ -19,26 +21,31 @@ public class LoginMenuView {
         float height = stage.getViewport().getWorldHeight();
         float width = stage.getViewport().getWorldWidth();
 
-        table = new Table();
-        table.setFillParent(true);
-        table.center();
-        table.pad(40);
+        initiateMainTable(skin);
 
-        stage.addActor(table);
+    }
+
+    private void initiateMainTable(Skin skin) {
+        mainTable = new Table();
+        mainTable.setFillParent(true);
+        mainTable.center();
+        mainTable.pad(40);
+
+        stage.addActor(mainTable);
 
         //Title
         Label title = new Label("Login", skin);
         title.setFontScale(1.5f);
-        table.add(title).colspan(2).padBottom(20);
-        table.row();
+        mainTable.add(title).colspan(2).padBottom(20);
+        mainTable.row();
 
         //Username
         Label usernameLabel = new Label("Username:", skin);
         usernameField = new TextField("", skin);
         usernameField.setMessageText("Enter username");
-        table.add(usernameLabel).pad(10).right();
-        table.add(usernameField).pad(10).width(300);
-        table.row();
+        mainTable.add(usernameLabel).pad(10).right();
+        mainTable.add(usernameField).pad(10).width(300);
+        mainTable.row();
 
         //Pass
         Label passwordLabel = new Label("Password:", skin);
@@ -46,20 +53,44 @@ public class LoginMenuView {
         passwordField.setPasswordMode(true);
         passwordField.setPasswordCharacter('*');
         passwordField.setMessageText("Enter password");
-        table.add(passwordLabel).pad(10).right();
-        table.add(passwordField).pad(10).width(300);
-        table.row();
+        mainTable.add(passwordLabel).pad(10).right();
+        mainTable.add(passwordField).pad(10).width(300);
+        mainTable.row();
 
         //Buttons
         loginButton = new TextButton("Login", skin);
-        backButton = new TextButton("Sign Up", skin);
+        signupBtn = new TextButton("Sign Up", skin);
+        forgetPassBtn = new TextButton("Forget Password", skin);
+
+//        forgetPassBtn.getLabel().setFontScale(0.75f);
+
 
         Table buttonTable = new Table();
-        buttonTable.defaults().pad(10).height(75).width(400);
+        buttonTable.defaults().pad(10).height(75).width(300);
         buttonTable.add(loginButton);
-        buttonTable.add(backButton);
-        table.add(buttonTable).colspan(2).padTop(20).center();
+        buttonTable.add(signupBtn);
+        buttonTable.row();
+        buttonTable.add(forgetPassBtn).colspan(2).width(600);
+        mainTable.add(buttonTable).colspan(2).padTop(20).center();
+    }
 
+    private void initiateForgetPassTable(Skin skin) {
+        forgetPassTable = new Table();
+        forgetPassTable.setFillParent(true);
+        forgetPassTable.setVisible(false);
+        forgetPassTable.center();
+        forgetPassTable.pad(40);
+
+        securityQuestionField = new TextField("", skin);
+        securityQuestionField.setMessageText("Enter your security answer");
+
+        submitBtn = new TextButton("Submit", skin);
+
+        forgetPassTable.add(securityQuestionField);
+        forgetPassTable.row();
+        forgetPassTable.add(submitBtn);
+
+        stage.addActor(forgetPassTable);
     }
 
 

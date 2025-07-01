@@ -78,6 +78,9 @@ public class SignupMenuController {
     }
 
     private Result checkUsername(String username) {
+        if("guest".equals(username)) {
+            return new Result(false, "you can't make a user with guest name");
+        }
         if(AppData.getAppData().getUserByUsername(username) != null) {
             return new Result(false, "user already exists!");
         }
@@ -87,9 +90,12 @@ public class SignupMenuController {
     }
 
 
+    public void guest() {
+        AppData.getAppData().setActiveUser(new User("guest", "", ""));
 
-
-    public Result forgetPass() {
-        return null;
     }
+
+
+
+
 }

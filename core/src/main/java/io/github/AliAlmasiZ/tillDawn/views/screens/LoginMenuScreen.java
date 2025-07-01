@@ -31,10 +31,17 @@ public class LoginMenuScreen implements Screen {
             }
         });
 
-        view.backButton.addListener(new ClickListener() {
+        view.signupBtn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 main.setScreen(new SignUpMenuScreen(main));
+            }
+        });
+
+        view.forgetPassBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+
             }
         });
 
