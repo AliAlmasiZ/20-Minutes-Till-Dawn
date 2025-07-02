@@ -5,6 +5,7 @@ import io.github.AliAlmasiZ.tillDawn.models.DataBase.DataBaseManager;
 import io.github.AliAlmasiZ.tillDawn.models.DataBase.PlayerDAO;
 import io.github.AliAlmasiZ.tillDawn.models.User;
 import io.github.AliAlmasiZ.tillDawn.models.Result;
+import io.github.AliAlmasiZ.tillDawn.views.Text;
 
 public class LoginMenuController {
     /*public Result login(String username, String password) {
@@ -22,14 +23,21 @@ public class LoginMenuController {
     public Result login(String username, String password) {
         User user = AppData.getAppData().getUserByUsername(username);
         if(user == null)
-            return new Result(false, "there is no user with this username!");
+            return new Result(false, Text.USERNAME_NOT_FOUND.getText());
         if(!user.getPassword().equals(password))
-            return new Result(false, "password is incorrect!");
+            return new Result(false, Text.INCORRECT_PASSWORD.getText());
         AppData.getAppData().setActiveUser(user);
-        return new Result(true, "user logged in successfully!");
+        return new Result(true, Text.USER_LOGGED_IN.getText());
     }
 
-    public Result forgetPass() {
-        return null;
+    public Result forgetPass(String username, String answer) {
+        User user = AppData.getAppData().getUserByUsername(username);
+        if (user == null)
+            return new Result(false, Text.USERNAME_NOT_FOUND.getText());
+        if (user.getSecurityAnswer().equals(answer))
+            return new Result(true, Text.YOUR_PASS_IS.getText() + "'" + user.getPassword() + "'");
+
+        return new Result(false, Text.SECURITY_ANSWER_DOESNT_MATCH.getText());
+
     }
 }

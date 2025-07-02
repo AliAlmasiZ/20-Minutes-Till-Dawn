@@ -43,7 +43,7 @@ public class SignupMenuView {
         //Username
         usernameLabel = new Label( Text.USERNAME.getText() + ":", skin);
         usernameField = new TextField("", skin);
-        usernameField.setMessageText(Text.ENTER_USER_NAME.getText());
+        usernameField.setMessageText(Text.ENTER_USERNAME.getText());
         table.add(usernameLabel).pad(10).right();
         table.add(usernameField).pad(10).width(400);
         table.row();

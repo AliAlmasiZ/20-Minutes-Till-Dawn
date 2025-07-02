@@ -25,9 +25,14 @@ public class LoginMenuScreen implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 Result result = controller.login(view.usernameField.getText(), view.passwordField.getText());
-                if(!result.isSuccessful()) {
-
+                if(result.isSuccessful()) {
+                    main.setScreen(new MainMenuScreen(main));
+                    view.dispose();
+                    LoginMenuScreen.this.dispose();
+                    return;
                 }
+                view.setStatusMessage(result);
+
             }
         });
 
@@ -41,7 +46,15 @@ public class LoginMenuScreen implements Screen {
         view.forgetPassBtn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
+                view.showForgetPassMenu(true);
+            }
+        });
 
+        view.submitBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                view.showForgetPassMenu(false);
+                view.setStatusMessage(controller.forgetPass(view.username2Field.getText(), view.securityQuestionField.getText()));
             }
         });
 
