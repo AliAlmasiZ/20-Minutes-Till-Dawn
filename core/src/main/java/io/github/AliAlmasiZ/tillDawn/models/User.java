@@ -1,5 +1,7 @@
 package io.github.AliAlmasiZ.tillDawn.models;
 
+import com.badlogic.gdx.graphics.Texture;
+
 import javax.persistence.*;
 
 @Entity
@@ -16,6 +18,8 @@ public class User {
     private int score;
     @Transient
     private Player player;
+    @Transient
+    private Texture avatar;
 
 
     private User(){}
@@ -102,5 +106,14 @@ public class User {
 
     public void setPlayer(Player player) {
         this.player = player;
+    }
+
+
+    public Texture getAvatar() {
+        return avatar;
+    }
+
+    public void setAvatar(Texture avatar) {
+        this.avatar = avatar;
     }
 }

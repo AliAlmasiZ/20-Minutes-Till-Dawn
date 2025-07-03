@@ -4,6 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Array;
@@ -80,6 +81,10 @@ public class GameAssetManager {
     public Texture backgroundTileTex;
     public Texture treeTex = new Texture(tree);
 
+    //fonts
+    public final String CHEVY_RAY_EXPRESS = "Fonts/Font/ChevyRay-Express.ttf";
+    public final String CHEVY_RAY_LANTERN = "Fonts/Font/ChevyRay-Lantern.ttf";
+
 
 
 
@@ -126,6 +131,9 @@ public class GameAssetManager {
         manager.load(xpOrb, Texture.class);
         manager.load(bullet, Texture.class);
         manager.load(backgroundTile, Texture.class);
+
+//        manager.load(CHEVY_RAY_EXPRESS, BitmapFont.class);
+//        manager.load(CHEVY_RAY_LANTERN, BitmapFont.class);
 
         manager.finishLoading();
 
@@ -214,5 +222,9 @@ public class GameAssetManager {
 
     public Animation<TextureRegion> getCharacterRunAnim() {
         return characterRunAnim;
+    }
+
+    public synchronized <T> T get (String fileName, Class<T> type) {
+        return manager.get(fileName, type);
     }
 }
