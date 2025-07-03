@@ -22,6 +22,8 @@ public enum Text {
     YOUR_PASS_IS("your password is: ", "ramz shoma hast: "),
     INCORRECT_PASSWORD("password is incorrect!", "password nadorost ast"),
     USER_LOGGED_IN("user logged in successfully!", "ba movafaghiat vared shodid!"),
+    //PROFILE MENU
+    GO_BACK("go back", "bazgasht"),
 
 
 

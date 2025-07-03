@@ -30,6 +30,7 @@ public class User {
         this.id = ++playersCount;
         score = 0;
         this.player = new Player();
+        this.player.setUserID(id);
     }
 
 

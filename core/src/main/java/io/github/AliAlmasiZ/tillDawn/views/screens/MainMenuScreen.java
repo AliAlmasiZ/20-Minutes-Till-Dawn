@@ -3,6 +3,7 @@ package io.github.AliAlmasiZ.tillDawn.views.screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
+import com.badlogic.gdx.scenes.scene2d.Event;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import io.github.AliAlmasiZ.tillDawn.Main;
@@ -23,7 +24,48 @@ public class MainMenuScreen implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 main.setScreen(new ProfileMenuScreen(main));
-                MainMenuScreen.this.dispose();
+                dispose();
+            }
+        });
+
+        view.scoreboardBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                main.setScreen(new ScoreboardScreen(main));
+                dispose();
+            }
+        });
+
+        view.settingsBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                main.setScreen(new SettingMenuScreen(main));
+                dispose();
+            }
+        });
+
+        view.hintBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                main.setScreen(new HintMenuScreen(main));
+                dispose();
+            }
+        });
+
+        view.pregameBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                main.setScreen(new PregameMenuScreen(main));
+                dispose();
+            }
+        });
+
+        view.loadGameBtn.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                //TODO: for save should store gamedata but for now
+                main.setScreen(new GameScreen(main));
+                dispose();
             }
         });
 
@@ -32,6 +74,8 @@ public class MainMenuScreen implements Screen {
             public void clicked(InputEvent event, float x, float y) {
                 AppData.getAppData().setActiveUser(null);
                 main.setScreen(new LoginMenuScreen(main));
+                dispose();
+
             }
         });
     }
@@ -72,6 +116,6 @@ public class MainMenuScreen implements Screen {
 
     @Override
     public void dispose() {
-
+        view.dispose();
     }
 }

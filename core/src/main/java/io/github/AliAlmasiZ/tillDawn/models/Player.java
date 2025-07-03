@@ -22,6 +22,7 @@ import java.io.Serializable;
 
 @Entity
 public class Player implements Serializable {
+    private int UserID;
     public Vector2 position;
     public float baseSpeed = 200f;
     public float speed;
@@ -323,5 +324,13 @@ public class Player implements Serializable {
 
     public float getRotation() {
         return rotation;
+    }
+
+    public int getUserID() {
+        return UserID;
+    }
+
+    public void setUserID(int userID) {
+        UserID = userID;
     }
 }

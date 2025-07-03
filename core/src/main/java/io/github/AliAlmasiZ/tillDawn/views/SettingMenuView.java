@@ -8,5 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.TextButton;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 
 public class SettingMenuView {
-    
+
+    public SettingMenuView(Skin skin) {
+    }
 }
