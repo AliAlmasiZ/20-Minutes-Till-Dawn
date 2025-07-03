@@ -21,8 +21,8 @@ public class ProfileMenuView {
     private final OrthographicCamera camera;
     private final SpriteBatch batch;
     private final ShapeRenderer shapes;
-    private final BitmapFont titleFont;
-    private final BitmapFont detailFont;
+    private BitmapFont titleFont;
+    private BitmapFont detailFont;
     private final User user;
 
     private final float avatarSize = 120;
@@ -48,7 +48,7 @@ public class ProfileMenuView {
         shapes = new ShapeRenderer();
 
 
-        FreeTypeFontGenerator titleGenerator = new FreeTypeFontGenerator(Gdx.files.internal(
+        /*FreeTypeFontGenerator titleGenerator = new FreeTypeFontGenerator(Gdx.files.internal(
             GameAssetManager.getGameAssetManager().CHEVY_RAY_LANTERN
         ));
         FreeTypeFontGenerator detailGenerator = new FreeTypeFontGenerator(Gdx.files.internal(
@@ -61,7 +61,7 @@ public class ProfileMenuView {
         detailParameter.size = 12;
 
         titleFont = titleGenerator.generateFont(titleParameter);
-        detailFont = detailGenerator.generateFont(detailParameter);
+        detailFont = detailGenerator.generateFont(detailParameter);*/
 
 
         user = AppData.getAppData().getActiveUser();

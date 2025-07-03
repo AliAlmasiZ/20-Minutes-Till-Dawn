@@ -1,8 +1,12 @@
 package io.github.AliAlmasiZ.tillDawn.models;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.utils.Array;
 
 import javax.persistence.*;
+import java.util.logging.FileHandler;
 
 @Entity
 public class User {
@@ -35,8 +39,17 @@ public class User {
         score = 0;
         this.player = new Player();
         this.player.setUserID(id);
+        setRandomAvatar();
     }
 
+
+    private void setRandomAvatar() {
+        FileHandle dir = Gdx.files.internal("avatars");
+        Array<FileHandle> files = Array.with(dir.list());
+        FileHandle pick = files.random();
+        Texture avatar = new Texture(pick);
+        this.setAvatar(avatar);
+    }
 
     public void loadPlayer() {
 
