@@ -73,6 +73,11 @@ public class GameAssetManager {
 
 
 
+    //avatars
+    public final String[] avatars = new String[] {
+        "avatars/T_Abby_Portrait.png", "avatars/T_Dasher_Portrait.png", "avatars/T_Hastur_Portrait.png"
+    };
+
 
 
     //Textures
@@ -81,9 +86,12 @@ public class GameAssetManager {
     public Texture backgroundTileTex;
     public Texture treeTex = new Texture(tree);
 
+
+
+
     //fonts
-    public final String CHEVY_RAY_EXPRESS = "Fonts/Font/ChevyRay-Express.ttf";
-    public final String CHEVY_RAY_LANTERN = "Fonts/Font/ChevyRay-Lantern.ttf";
+    public final String CHEVY_RAY_EXPRESS = "Fonts/Font/ChevyRay - Express.fnt";
+    public final String CHEVY_RAY_LANTERN = "Fonts/Font/ChevyRay - Lantern.fnt";
 
 
 

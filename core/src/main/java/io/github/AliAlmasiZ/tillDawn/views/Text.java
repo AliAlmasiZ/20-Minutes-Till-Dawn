@@ -24,7 +24,7 @@ public enum Text {
     USER_LOGGED_IN("user logged in successfully!", "ba movafaghiat vared shodid!"),
     //PROFILE MENU
     GO_BACK("go back", "bazgasht"),
-
+    CHOOSE_PICTURE("choose picture", "entekhabe aks"),
 
 
     ;

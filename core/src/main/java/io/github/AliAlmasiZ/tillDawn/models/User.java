@@ -47,8 +47,7 @@ public class User {
         FileHandle dir = Gdx.files.internal("avatars");
         Array<FileHandle> files = Array.with(dir.list());
         FileHandle pick = files.random();
-        Texture avatar = new Texture(pick);
-        this.setAvatar(avatar);
+        this.setAvatar(pick.path());
     }
 
     public void loadPlayer() {
@@ -126,7 +125,11 @@ public class User {
         return avatar;
     }
 
-    public void setAvatar(Texture avatar) {
+    private void setAvatar(Texture avatar) {
         this.avatar = avatar;
+    }
+
+    public void setAvatar(String path) {
+        setAvatar(new Texture(path));
     }
 }

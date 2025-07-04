@@ -183,11 +183,12 @@ public class GameScreen extends ScreenAdapter {
         FreeTypeFontGenerator generator = null;
         try {
 
-            generator = new FreeTypeFontGenerator(Gdx.files.internal("Fonts/Font/ChevyRay - Express.ttf"));
-            FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-            parameter.size = 24;
-            parameter.color = Color.WHITE;
-            font = generator.generateFont(parameter);
+//            generator = new FreeTypeFontGenerator(Gdx.files.internal("Fonts/Font/ChevyRay - Express.ttf"));
+//            FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+//            parameter.size = 24;
+//            parameter.color = Color.WHITE;
+//            font = generator.generateFont(parameter);
+            font = new BitmapFont(Gdx.files.internal(GameAssetManager.getGameAssetManager().CHEVY_RAY_EXPRESS));
 //            font = new BitmapFont(Gdx.files.internal("Fonts/Font/ChevyRay - Express.ttf"));
 //            font.setColor(Color.WHITE);
 
