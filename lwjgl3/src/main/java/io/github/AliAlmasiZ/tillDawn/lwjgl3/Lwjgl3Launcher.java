@@ -4,8 +4,10 @@ import com.badlogic.gdx.backends.lwjgl3.Lwjgl3Application;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3ApplicationConfiguration;
 import com.badlogic.gdx.backends.lwjgl3.Lwjgl3WindowAdapter;
 import io.github.AliAlmasiZ.tillDawn.Main;
+import io.github.AliAlmasiZ.tillDawn.controllers.ProfileController;
 import io.github.AliAlmasiZ.tillDawn.models.DataBase.AppData;
 import io.github.AliAlmasiZ.tillDawn.models.User;
+import io.github.AliAlmasiZ.tillDawn.views.ProfileMenuView;
 import io.github.AliAlmasiZ.tillDawn.views.screens.ProfileMenuScreen;
 
 /** Launches the desktop (LWJGL3) application. */
@@ -43,7 +45,7 @@ public class Lwjgl3Launcher {
             public void filesDropped(String[] files) {
                 if(Main.getInstance().getScreen() instanceof ProfileMenuScreen) {
                     if(files[0].endsWith(".png") || files[0].endsWith(".jpg"))
-                        AppData.getAppData().activeUser.setAvatar(files[0]);
+                        ((ProfileMenuScreen) Main.getInstance().getScreen()).setAvatar(files[0]);
                 }
             }
 

@@ -7,7 +7,11 @@ import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.ui.Image;
+import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.ScreenUtils;
 import io.github.AliAlmasiZ.tillDawn.controllers.MainMenuController;
 import io.github.AliAlmasiZ.tillDawn.models.DataBase.AppData;
@@ -43,6 +47,8 @@ public class Main extends Game {
 
     @Override
     public void render() {
+        Gdx.gl.glClearColor(0.1f, 0.1f, 0.15f, 1);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
         super.render();
     }
 

@@ -4,9 +4,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Array;
+import io.github.AliAlmasiZ.tillDawn.models.DataBase.AppData;
 
 import javax.persistence.*;
-import java.util.logging.FileHandler;
 
 @Entity
 public class User {
@@ -20,10 +20,9 @@ public class User {
     private String securityAnswer;
     private int langID;
     private int score;
+    private String avatarPath;
     @Transient
     private Player player;
-    @Transient
-    private Texture avatar;
 
 
     private User(){}
@@ -47,6 +46,7 @@ public class User {
         FileHandle dir = Gdx.files.internal("avatars");
         Array<FileHandle> files = Array.with(dir.list());
         FileHandle pick = files.random();
+        Gdx.app.log("random avatar", pick.path());
         this.setAvatar(pick.path());
     }
 
@@ -121,15 +121,17 @@ public class User {
     }
 
 
-    public Texture getAvatar() {
-        return avatar;
+    public Texture getAvatarTex() {
+        return new Texture(avatarPath);
     }
 
-    private void setAvatar(Texture avatar) {
-        this.avatar = avatar;
-    }
+
 
     public void setAvatar(String path) {
-        setAvatar(new Texture(path));
+        avatarPath = path;
+    }
+
+    public void delete() {
+
     }
 }

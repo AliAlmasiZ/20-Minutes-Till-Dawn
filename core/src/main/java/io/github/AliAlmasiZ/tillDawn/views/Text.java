@@ -4,6 +4,7 @@ public enum Text {
     //signup menu
     CREATE_ACCOUNT("Create account", "sakht akant"),
     USERNAME("Username", "name karbari"),
+    SCORE("Score", "emtiaz"),
     ENTER_USERNAME("Enter username", "name karbari vared konid"),
     PASSWORD("Password", "ramz"),
     ENTER_PASSWORD("Enter password", "ramz vared konid"),

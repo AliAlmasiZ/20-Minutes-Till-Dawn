@@ -1,99 +1,106 @@
 package io.github.AliAlmasiZ.tillDawn.views;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import com.badlogic.gdx.utils.CharArray;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import io.github.AliAlmasiZ.tillDawn.models.DataBase.AppData;
-import io.github.AliAlmasiZ.tillDawn.models.GameAssetManager;
 import io.github.AliAlmasiZ.tillDawn.models.User;
 
 public class ProfileMenuView{
-    private final OrthographicCamera camera;
-    private final SpriteBatch batch;
-    private final ShapeRenderer shapes;
-    private BitmapFont titleFont;
-    private BitmapFont detailFont;
+    private final AvatarchooseDialog dialog;
     private final User user;
 
-    private final float avatarSize = 120;
+    private final float avatarSize = 300;
     private final float avatarRadius = avatarSize / 2;
     private final Vector2 avatarPosition = new Vector2();
 
 
     private Stage stage;
-    private Table buttonTable, dataTable, table;
+    private Table dataTable, table;
 
-    public final TextButton changeUsernameBtn, changePasswordBtn, deleteAccountBtn, changeAvatarBtn, backBtn;
-//    public final Image avatarImage;
+    public final TextButton deleteAccountBtn, backBtn, submitBtn;
+    public final TextField usernameField, passwordField;
+    public final Image avatar;
     public final Label messageLabel;
 
 
     public ProfileMenuView(Skin skin) {
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
+        user = AppData.getAppData().getActiveUser();
 
-        camera = new OrthographicCamera();
-        camera.setToOrtho(false, 800, 480);
-        batch = new SpriteBatch();
-        shapes = new ShapeRenderer();
 
+        messageLabel = new Label("", skin);
+        messageLabel.setVisible(false);
+        messageLabel.setText("");
 
         table = new Table();
         table.setFillParent(true);
+        stage.addActor(table);
+
+        dialog = new AvatarchooseDialog(skin, this);
+
+        avatar = new Image(user.getAvatarTex());
+        avatar.setScaling(Scaling.fit);
+
+        avatar.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                dialog.show(stage);
+            }
+        });
 
         Table avatarTable = new Table();
+        avatarTable.center();
+        table.add(avatarTable).center().size(avatarSize, avatarSize).row();
+        avatarTable.add(avatar).center().grow().space(10);
+
+        table.add(messageLabel).row();
+
+
+        dataTable = new Table();
+        Label usernameLabel = new Label(Text.USERNAME + ": ", skin);
+        usernameField = new TextField(user.getUsername(), skin);
+        Label passwordLabel = new Label(Text.PASSWORD + ": ", skin);
+        passwordField = new TextField(user.getPassword(), skin);
+        Label scoreLabel = new Label(Text.SCORE.getText() + ": " + user.getScore(), skin);
+        dataTable.add(usernameLabel).left().padBottom(10);
+        dataTable.add(usernameField).right().padBottom(10).width(300);
+        dataTable.row();
+        dataTable.add(passwordLabel).left().padBottom(10);
+        dataTable.add(passwordField).right().padBottom(10).width(300);
+        dataTable.row();
+        dataTable.add(scoreLabel).center().padBottom(20).colspan(2);
+        dataTable.row();
+
+        deleteAccountBtn = new TextButton("Delete Account", skin);
+        backBtn = new TextButton(Text.GO_BACK.getText(), skin);
+        submitBtn = new TextButton(Text.SUBMIT.getText(), skin);
+
+        // Add buttons to details
+        dataTable.add(submitBtn).pad(10);
+        dataTable.add(backBtn).pad(10).row();
+        dataTable.add(deleteAccountBtn).fillX().colspan(2).pad(10);
 
 
 
-//        FreeTypeFontGenerator titleGenerator = new FreeTypeFontGenerator(Gdx.files.internal(
-//            GameAssetManager.getGameAssetManager().CHEVY_RAY_LANTERN
-//        ));
-//        FreeTypeFontGenerator detailGenerator = new FreeTypeFontGenerator(Gdx.files.internal(
-//            GameAssetManager.getGameAssetManager().CHEVY_RAY_EXPRESS
-//        ));
-//
-//        FreeTypeFontGenerator.FreeTypeFontParameter titleParameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-//        FreeTypeFontGenerator.FreeTypeFontParameter detailParameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-//        titleParameter.size = 20;
-//        detailParameter.size = 12;
 
-//        titleFont = titleGenerator.generateFont(titleParameter);
-//        detailFont = detailGenerator.generateFont(detailParameter);
-        titleFont = new BitmapFont(Gdx.files.internal(GameAssetManager.getGameAssetManager().CHEVY_RAY_LANTERN));
-        detailFont = new BitmapFont(Gdx.files.internal(GameAssetManager.getGameAssetManager().CHEVY_RAY_EXPRESS));
 
-        user = AppData.getAppData().getActiveUser();
+        table.add(dataTable);
+
 
 
         float width = stage.getViewport().getScreenWidth();
         float height = stage.getViewport().getScreenHeight();
 
-        buttonTable = new Table();
-        buttonTable.setFillParent(true);
-        buttonTable.center();
-        buttonTable.pad(40);
 
-        stage.addActor(buttonTable);
-
-        //Title
-        Label title = new Label("Profile Menu", skin);
-        title.setFontScale(1.5f);
-        buttonTable.add(title).colspan(2).padBottom(20);
-        buttonTable.row();
 
         //Avatar
 //        Texture avatarTexture = new Texture(Gdx.files.internal("avatars/default_avatar.png"));
@@ -104,36 +111,7 @@ public class ProfileMenuView{
 
 
 
-        dataTable = new Table();
-        Label nameLabel = new Label("Username: " + AppData.getAppData().getActiveUser().getUsername(), skin);
-        Label scoreLabel = new Label("Score: " + AppData.getAppData().getActiveUser().getScore(), skin);
-        dataTable.add(nameLabel).left().padBottom(10);
-//        details.row();
-        dataTable.add(scoreLabel).left().padBottom(20);
-        dataTable.row();
 
-        changeUsernameBtn = new TextButton("Change Username", skin);
-        changePasswordBtn = new TextButton("Change Password", skin);
-        deleteAccountBtn = new TextButton("Delete Account", skin);
-        changeAvatarBtn = new TextButton("Change Avatar", skin);
-        backBtn = new TextButton(Text.GO_BACK.getText(), skin);
-
-        // Add buttons to details
-        dataTable.add(changeUsernameBtn).fillX().pad(5);
-        dataTable.row();
-        dataTable.add(changePasswordBtn).fillX().pad(5);
-        dataTable.row();
-        dataTable.add(changeAvatarBtn).fillX().pad(5);
-        dataTable.row();
-        dataTable.add(deleteAccountBtn).fillX().pad(5);
-
-        buttonTable.add(dataTable);
-        buttonTable.row();
-
-        messageLabel = new Label("", skin);
-        messageLabel.setVisible(false);
-        messageLabel.setText("");
-        buttonTable.add(messageLabel).colspan(2).fillX().padTop(20).height(30);
 
 
     }
@@ -141,26 +119,13 @@ public class ProfileMenuView{
 
     public void render(float delta) {
 
-//        stage.act(delta);
-//        stage.draw();
+        stage.act(delta);
+        stage.draw();
 
 
-        Gdx.gl.glClearColor(0.1f, 0.1f, 0.15f, 1);
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
 
-        avatarPosition.set(
-            camera.viewportWidth * 0.5f - avatarRadius,
-            camera.viewportHeight * 0.7f - avatarRadius
-        );
 
-        batch.setProjectionMatrix(camera.combined);
-        shapes.setProjectionMatrix(camera.combined);
 
-        //TODO : background
-
-        drawAvatar();
-
-        drawUserDetails();
 
 
     }
@@ -174,15 +139,7 @@ public class ProfileMenuView{
 
 
     private void drawAvatar() {
-        Image avatar = new Image(AppData.getAppData().activeUser.getAvatar());
-        avatar.setScaling(Scaling.fit);
 
-        avatar.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
-                
-            }
-        });
 
 
 
@@ -216,7 +173,7 @@ public class ProfileMenuView{
 //        Gdx.gl.glStencilMask(0x00);
 //
 //        batch.begin();
-//        batch.draw(user.getAvatar(),
+//        batch.draw(user.getAvatarTex(),
 //            avatarPosition.x, avatarPosition.y,
 //            avatarSize, avatarSize
 //            );
@@ -234,24 +191,5 @@ public class ProfileMenuView{
 //        shapes.end();
     }
 
-    private void drawUserDetails() {
-        User user = AppData.getAppData().getActiveUser();
-
-        float centerX = camera.viewportWidth / 2;
-        float yPos = avatarPosition.y - 30;
-
-        batch.begin();
-        titleFont.setColor(0.9f, 0.9f, 0.95f, 1);
-        GlyphLayout layout = new GlyphLayout(titleFont, user.getUsername());
-        titleFont.draw(batch, user.getUsername(),
-            centerX - layout.width / 2, yPos);
-
-        yPos -= 30;
-        detailFont.setColor(0.7f, 0.7f, 0.8f, 1);
-        layout = new GlyphLayout(detailFont, user.getPassword());
-        detailFont.draw(batch, user.getPassword(),
-            centerX - layout.width / 2, yPos);
-        batch.end();
-    }
 
 }
