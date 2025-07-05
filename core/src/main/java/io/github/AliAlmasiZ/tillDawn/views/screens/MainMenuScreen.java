@@ -39,8 +39,7 @@ public class MainMenuScreen implements Screen {
         view.settingsBtn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                main.setScreen(new SettingMenuScreen(main));
-                dispose();
+                main.setScreen(new SettingMenuScreen(main, MainMenuScreen.this));
             }
         });
 
@@ -63,7 +62,7 @@ public class MainMenuScreen implements Screen {
         view.loadGameBtn.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                //TODO: for save should store gamedata but for now
+                //TODO: for save should store gamedata
                 main.setScreen(new GameScreen(main));
                 dispose();
             }
@@ -92,7 +91,7 @@ public class MainMenuScreen implements Screen {
 
     @Override
     public void show() {
-
+        view.show();
     }
 
 

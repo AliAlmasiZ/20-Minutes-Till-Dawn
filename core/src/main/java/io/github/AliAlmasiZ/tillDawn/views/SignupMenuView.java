@@ -108,7 +108,7 @@ public class SignupMenuView {
     }
 
     public void dispose() {
-        stage.draw();
+        stage.dispose();
     }
 
     public void setStatusMessage(Result result) {

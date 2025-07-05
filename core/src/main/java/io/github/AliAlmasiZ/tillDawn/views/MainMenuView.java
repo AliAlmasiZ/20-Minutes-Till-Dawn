@@ -48,17 +48,17 @@ public class MainMenuView {
 //        table.row().padTop(30);
 
         // Continue saved game button
-        loadGameBtn = new TextButton("Continue Saved Game", skin);
+        loadGameBtn = new TextButton(Text.CONTINUE_SAVED_GAME.getText(), skin);
         table.add(loadGameBtn).colspan(2).fillX().pad(5);
         table.row();
 
         // Menu buttons
-        settingsBtn = new TextButton("Settings", skin);
-        profileBtn = new TextButton("Profile", skin);
-        pregameBtn = new TextButton("Pre-Game", skin);
-        scoreboardBtn = new TextButton("Scoreboard", skin);
+        settingsBtn = new TextButton(Text.SETTINGS.getText(), skin);
+        profileBtn = new TextButton(Text.PROFILE.getText(), skin);
+        pregameBtn = new TextButton(Text.PRE_GAME.getText(), skin);
+        scoreboardBtn = new TextButton(Text.SCOREBOARD.getText(), skin);
         hintBtn = new TextButton("Hint Menu", skin);
-        logoutBtn = new TextButton("Logout", skin);
+        logoutBtn = new TextButton(Text.LOGOUT.getText(), skin);
 
         table.add(settingsBtn).fillX().pad(5);
         table.add(profileBtn).fillX().pad(5);
@@ -81,6 +81,10 @@ public class MainMenuView {
 
     public void dispose() {
         stage.dispose();
+    }
+
+    public void show() {
+        Gdx.input.setInputProcessor(stage);
     }
 
 }

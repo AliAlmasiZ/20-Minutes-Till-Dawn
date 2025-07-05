@@ -39,10 +39,14 @@ public class ControlsManager {
         Gdx.app.log("ControlsManager", "Controls saved.");
     }
 
-    public static void setKeyForAction(GameAction action, int keyCode) {
-        //TODO: check conflicts
+    public static boolean setKeyForAction(GameAction action, int keyCode) {
+        for (Integer value : keyMappings.values()) {
+            if(value.equals(keyCode))
+                return false;
+        }
         keyMappings.put(action, keyCode);
         Gdx.app.log("ControlsManager", "Set " + action.name() + " to keycode: " + keyCode);
+        return true;
     }
 
     public static int getKeyForAction(GameAction action) {
@@ -75,5 +79,9 @@ public class ControlsManager {
 
     public static void refreshControls() {
         loadControls();
+    }
+
+    public static ObjectMap<GameAction, Integer> getKeyMappings() {
+        return new ObjectMap<>(keyMappings);
     }
 }

@@ -8,5 +8,14 @@ public enum GameAction {
     RELOAD,
     SHOOT,
     PAUSE,
-    TOGGLE_AUTO_AIM
+    TOGGLE_AUTO_AIM;
+
+
+    @Override
+    public String toString() {
+        return this.name().charAt(0) + this.name().toLowerCase().replace("_", " ").substring(1);
+    }
 }
+
+
+

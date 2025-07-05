@@ -23,9 +23,28 @@ public enum Text {
     YOUR_PASS_IS("your password is: ", "ramz shoma hast: "),
     INCORRECT_PASSWORD("password is incorrect!", "password nadorost ast"),
     USER_LOGGED_IN("user logged in successfully!", "ba movafaghiat vared shodid!"),
+    //MAIN MENU
+    SETTINGS("Settings", "tanzimat"),
+    PROFILE("Profile", "Profile"),
+    PRE_GAME("Pre-Game", "pish az bazi"),
+    SCOREBOARD("Scoreboard", "emtiazat"),
+    LOGOUT("Logout", "khorooj"),
+    CONTINUE_SAVED_GAME("Continue Saved Game", "edame bazi"),
+
     //PROFILE MENU
     GO_BACK("go back", "bazgasht"),
     CHOOSE_PICTURE("choose picture", "entekhabe aks"),
+
+    //SETTINGS MENU
+    SFX_VOLUME("sfx volume", "sedaye sfx"),
+    MUSIC_VOLUME("music volume", "sedaye musiqi"),
+    MUSIC_TRACK("music track", "tracke musiqi"),
+    CHANGE_INPUTS("change inputs", "taghir dokme ha"),
+    AUTO_RELOAD("auto reload", "reload khodkar"),
+    BLACK_AND_WHITE("black and white", "siah o sefid"),
+    ENTER_KEY("enter a key", "yek klid vared konid"),
+
+
 
 
     ;
