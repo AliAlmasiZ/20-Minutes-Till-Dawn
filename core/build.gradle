@@ -8,10 +8,9 @@ dependencies {
   api "com.badlogicgames.gdx:gdx-freetype:$gdxVersion"
   api "com.badlogicgames.gdx:gdx-platform:$gdxVersion:natives-desktop"
 
-
-
+  implementation "com.badlogicgames.gdx:gdx-audio:$gdxVersion"
   implementation 'mysql:mysql-connector-java:8.0.33'
-
+  implementation "com.google.code.gson:gson:2.13.1"
 
 
   // Optional logging (Hibernate uses JBoss logging)
@@ -22,7 +21,8 @@ dependencies {
   implementation 'org.hibernate:hibernate-core:5.6.15.Final'
 
   // H2 Database
-  implementation 'com.h2database:h2:2.1.214'
+//  implementation 'com.h2database:h2:2.1.214'
+  implementation "com.h2database:h2:2.2.220"
 
   // JPA API (annotations)
   implementation 'jakarta.persistence:jakarta.persistence-api:2.2.3'

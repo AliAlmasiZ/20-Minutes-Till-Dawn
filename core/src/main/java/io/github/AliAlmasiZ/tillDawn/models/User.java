@@ -5,10 +5,12 @@ import com.badlogic.gdx.files.FileHandle;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Array;
 import io.github.AliAlmasiZ.tillDawn.models.DataBase.AppData;
+import io.github.AliAlmasiZ.tillDawn.models.DataBase.JsonSaver;
 
 import javax.persistence.*;
 
 @Entity
+@Table(name = "users")
 public class User {
     static int playersCount = 0;
     @Id
@@ -18,11 +20,10 @@ public class User {
     private String password;
 //    private String securityQuestion;
     private String securityAnswer;
-    private int langID;
     private int score;
     private String avatarPath;
     @Transient
-    private Player player;
+    private transient Player player;
 
 
     private User(){}
@@ -33,10 +34,9 @@ public class User {
         this.password = password;
 //        this.securityQuestion = securityQuestion;
         this.securityAnswer = securityAnswer;
-        this.langID = 1;
         this.id = ++playersCount;
         score = 0;
-        this.player = new Player();
+        this.player = JsonSaver.getInstance().loadPlayer(this);
         this.player.setUserID(id);
         setRandomAvatar();
     }
@@ -96,13 +96,6 @@ public class User {
         this.securityAnswer = securityAnswer;
     }
 
-    public int getLangID() {
-        return langID;
-    }
-
-    public void setLangID(int langID) {
-        this.langID = langID;
-    }
 
     public int getScore() {
         return score;

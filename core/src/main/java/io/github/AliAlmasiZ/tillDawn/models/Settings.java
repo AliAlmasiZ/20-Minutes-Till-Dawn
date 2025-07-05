@@ -2,6 +2,7 @@ package io.github.AliAlmasiZ.tillDawn.models;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
+import io.github.AliAlmasiZ.tillDawn.models.enums.MusicTrack;
 
 public class Settings {
     private static Settings instance;
@@ -14,7 +15,7 @@ public class Settings {
 
     public float sfxVolume;
     public float musicVolume;
-    //TODO: music
+    public MusicTrack musicTrack;
     public boolean autoReload;
     public boolean blackWhite;
 
@@ -24,6 +25,7 @@ public class Settings {
         musicVolume = prefs.getFloat(Fields.MUSIC_VOLUME.name(), 1f);
         autoReload = prefs.getBoolean(Fields.AUTO_RELOAD.name(), false);
         blackWhite = prefs.getBoolean(Fields.BLACK_N_WHITE.name(), false);
+        musicTrack = MusicTrack.valueOf(prefs.getString(Fields.MUSIC_TRACK.name(), MusicTrack.YOU_GO.name()));
         savePrefs();
     }
 
@@ -32,6 +34,7 @@ public class Settings {
         prefs.putFloat(Fields.SFX_VOLUME.name(), sfxVolume);
         prefs.putBoolean(Fields.BLACK_N_WHITE.name(), blackWhite);
         prefs.putBoolean(Fields.AUTO_RELOAD.name(), autoReload);
+        prefs.putString(Fields.MUSIC_TRACK.name(), musicTrack.name());
 
         prefs.flush();
     }
@@ -46,7 +49,8 @@ public class Settings {
         SFX_VOLUME,
         MUSIC_VOLUME,
         AUTO_RELOAD,
-        BLACK_N_WHITE
+        BLACK_N_WHITE,
+        MUSIC_TRACK
         ;
     }
 

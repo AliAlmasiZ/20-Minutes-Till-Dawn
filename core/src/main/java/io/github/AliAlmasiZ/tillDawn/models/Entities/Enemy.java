@@ -32,7 +32,7 @@ public class Enemy {
     // For Elder Boss dashing
     private long lastDashTimeElder;
     private static final float ELDER_DASH_COOLDOWN = 5000; // 5 seconds
-    private static final float ELDER_DASH_SPEED_MULTIPLIER = 3.0f;
+    private static final float ELDER_DASH_SPEED_MULTIPLIER = 10.0f;
     private boolean isDashingElder = false;
     private Vector2 dashTargetPositionElder;
     private static final float ELDER_DASH_DURATION = 0.5f; // How long the dash itself lasts
@@ -113,11 +113,11 @@ public class Enemy {
 
         Vector2 targetPos = isDashingElder ? dashTargetPositionElder : playerCenterPosition;
         float angle = MathUtils.atan2(
-            playerCenterPosition.y - (position.y + getHeight() / 2f),
-            playerCenterPosition.x - (position.x + getWidth() / 2f)
+            targetPos.y - (position.y + getHeight() / 2f),
+            targetPos.x - (position.x + getWidth() / 2f)
         );
-        position.x += MathUtils.cos(angle) * speed * delta;
-        position.y += MathUtils.sin(angle) * speed * delta;
+        position.x += MathUtils.cos(angle) * currentSpeed * delta;
+        position.y += MathUtils.sin(angle) * currentSpeed * delta;
 
         sprite.setPosition(position.x, position.y);
         bounds.set(sprite.getX(), sprite.getY(), sprite.getWidth(), sprite.getHeight());

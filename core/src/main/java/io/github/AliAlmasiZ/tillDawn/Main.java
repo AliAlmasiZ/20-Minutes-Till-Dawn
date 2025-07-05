@@ -4,6 +4,7 @@ import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Pixmap;
 import com.badlogic.gdx.graphics.Texture;
@@ -25,6 +26,8 @@ import io.github.AliAlmasiZ.tillDawn.views.MainMenuView;
 import io.github.AliAlmasiZ.tillDawn.views.screens.GameScreen;
 import io.github.AliAlmasiZ.tillDawn.views.screens.MainMenuScreen;
 import io.github.AliAlmasiZ.tillDawn.views.screens.SignUpMenuScreen;
+
+import java.util.Set;
 
 /** {@link com.badlogic.gdx.ApplicationListener} implementation shared by all platforms. */
 public class Main extends Game {
@@ -60,6 +63,7 @@ public class Main extends Game {
 
     @Override
     public void render() {
+        playMusic();
         frameBuffer.begin();
         Gdx.gl.glClearColor(0.1f, 0.1f, 0.15f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -88,6 +92,13 @@ public class Main extends Game {
 
     public static Main getInstance() {
         return instance;
+    }
+
+    public void playMusic() {
+        Music music = Gdx.audio.newMusic(Gdx.files.internal(Settings.getInstance().musicTrack.getPath()));
+        if(!music.isPlaying())
+            music.play();
+        music.setVolume(Settings.getInstance().musicVolume);
     }
 
 }

@@ -59,7 +59,7 @@ public class SignupMenuController {
         }
     }
 
-    private  Result checkPassword(String password) {
+    public   Result checkPassword(String password) {
         final Pattern special = Pattern.compile(".*(?=[_()*&%$#@]).*");
         final Pattern number = Pattern.compile(".*(?=\\d).*");
         final Pattern capitalLetter = Pattern.compile(".*(=?[A-Z]).*");

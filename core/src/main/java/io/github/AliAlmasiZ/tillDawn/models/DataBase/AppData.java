@@ -13,7 +13,9 @@ public class AppData {
     private List<User> allUsers;
 
     private AppData() {
-        allUsers = new ArrayList<>();
+        PlayerDAO dao = new PlayerDAO(null);
+        allUsers = new ArrayList<>(dao.loadAllPlayers());
+
     }
 
     public static AppData getAppData() {
@@ -30,8 +32,11 @@ public class AppData {
         this.activeUser = activeUser;
     }
     public void addUser(User user) throws InstanceAlreadyExistsException {
+
         if(allUsers.contains(user))
             throw new InstanceAlreadyExistsException("this user already exists");
+        PlayerDAO dao = new PlayerDAO(null);
+        dao.savePlayer(user);
         allUsers.add(user);
     }
 
@@ -41,5 +46,11 @@ public class AppData {
                 return user;
         }
         return null;
+    }
+
+    public void deleteUser(User user) {
+        allUsers.remove(user);
+        PlayerDAO dao = new PlayerDAO(null);
+        dao.deleteUser(user);
     }
 }

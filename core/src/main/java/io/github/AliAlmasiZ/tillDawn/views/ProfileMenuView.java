@@ -11,6 +11,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Scaling;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import io.github.AliAlmasiZ.tillDawn.models.DataBase.AppData;
+import io.github.AliAlmasiZ.tillDawn.models.Result;
 import io.github.AliAlmasiZ.tillDawn.models.User;
 
 public class ProfileMenuView{
@@ -25,7 +26,7 @@ public class ProfileMenuView{
     private Stage stage;
     private Table dataTable, table;
 
-    public final TextButton deleteAccountBtn, backBtn, submitBtn;
+    public final TextButton deleteAccountBtn, backBtn;
     public final TextField usernameField, passwordField;
     public final Image avatar;
     public final Label messageLabel;
@@ -82,12 +83,10 @@ public class ProfileMenuView{
 
         deleteAccountBtn = new TextButton("Delete Account", skin);
         backBtn = new TextButton(Text.GO_BACK.getText(), skin);
-        submitBtn = new TextButton(Text.SUBMIT.getText(), skin);
 
         // Add buttons to details
-        dataTable.add(submitBtn).pad(10);
-        dataTable.add(backBtn).pad(10).row();
-        dataTable.add(deleteAccountBtn).fillX().colspan(2).pad(10);
+        dataTable.add(backBtn).pad(10);
+        dataTable.add(deleteAccountBtn).fillX().colspan(2).pad(10).row();
 
 
 
@@ -191,5 +190,16 @@ public class ProfileMenuView{
 //        shapes.end();
     }
 
+
+    public void setStatusMessage(Result result) {
+        if(result == null) {
+            this.messageLabel.setVisible(false);
+            this.messageLabel.setText("");
+            return;
+        }
+        this.messageLabel.setText(result.message());
+        this.messageLabel.setVisible(true);
+//        this.statusMessageLabel.setVisible(!result.isSuccessful());
+    }
 
 }

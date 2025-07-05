@@ -1,5 +1,6 @@
 package io.github.AliAlmasiZ.tillDawn.models.DataBase;
 
+import io.github.AliAlmasiZ.tillDawn.models.Settings;
 import io.github.AliAlmasiZ.tillDawn.models.User;
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -26,6 +27,12 @@ public class PlayerDAO {
 //        }
 //    }
     public void savePlayer(User user) {
+        //for test
+//        JsonSaver.getInstance().savePlayer(user.getPlayer(), user);
+        JsonSaver.getInstance().saveUser(user);
+//--------------------------------
+
+
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = session.beginTransaction();
 
@@ -78,11 +85,40 @@ public class PlayerDAO {
         Session session = HibernateUtil.getSessionFactory().openSession();
         Transaction tx = session.beginTransaction();
 
-        List<User> users = new ArrayList<>(session.createQuery("FROM Player", User.class).list());
+        List<User> users = new ArrayList<>(session.createQuery("FROM User", User.class).list());
 
         tx.commit();
         session.close();
 
         return users;
     }
+
+    public void deleteUser(User user) {
+        Transaction tx = null;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            tx = session.beginTransaction();
+            session.delete(user);      // user must be a persistent or attached entity
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            throw e;
+        }
+    }
+
+    public int deleteUserById(Long id) {
+        Transaction tx = null;
+        int deletedCount = 0;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            tx = session.beginTransaction();
+            deletedCount = session.createQuery("delete from User u where u.id = :id")
+                .setParameter("id", id)
+                .executeUpdate();
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            throw e;
+        }
+        return deletedCount;
+    }
+
 }

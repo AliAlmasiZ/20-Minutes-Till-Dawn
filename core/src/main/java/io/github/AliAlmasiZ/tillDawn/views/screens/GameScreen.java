@@ -24,6 +24,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import io.github.AliAlmasiZ.tillDawn.Main;
 import io.github.AliAlmasiZ.tillDawn.controllers.utils.ControlsManager;
+import io.github.AliAlmasiZ.tillDawn.models.DataBase.GameData;
 import io.github.AliAlmasiZ.tillDawn.models.Entities.Bullet;
 import io.github.AliAlmasiZ.tillDawn.models.Entities.Enemy;
 import io.github.AliAlmasiZ.tillDawn.models.Entities.Tree;
@@ -43,7 +44,6 @@ public class GameScreen extends ScreenAdapter {
     private SpriteBatch batch;
     private OrthographicCamera camera;
     private Viewport viewport;
-
     private Player player;
 
     private Texture treeTexture;
@@ -93,7 +93,6 @@ public class GameScreen extends ScreenAdapter {
     private float gameTimer = 0;
     private final float MAX_GAME_TIME = 20 * 60;
 
-    private Music gameMusic;
     private Sound shootSound;
     private Sound enemyHitSound;
     private Sound playerHitSound;
@@ -127,6 +126,11 @@ public class GameScreen extends ScreenAdapter {
     private static final float GAME_WORLD_WIDTH = 1920;
     private static final float GAME_WORLD_HEIGHT = 1080;
 
+
+    public GameScreen(GameData data) {
+        this(Main.getInstance());
+
+    }
 
     public GameScreen(Main main) {
         this.main = main;

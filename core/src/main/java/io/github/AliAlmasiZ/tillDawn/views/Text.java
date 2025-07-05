@@ -44,7 +44,11 @@ public enum Text {
     BLACK_AND_WHITE("black and white", "siah o sefid"),
     ENTER_KEY("enter a key", "yek klid vared konid"),
 
-
+    //PAUSE
+    RESUME("resume", "edame"),
+    SHOW_CHEATCODES("show cheatcodes", "namayesh cheatcode ha"),
+    SHOW_ABILITIES("show abilities", "namayesh tavanaei ha"),
+    EXIT("exit/giveUp", "khorooj"),
 
 
     ;

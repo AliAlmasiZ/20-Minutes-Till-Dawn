@@ -9,7 +9,9 @@ import com.badlogic.gdx.scenes.scene2d.utils.ChangeListener;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
+import io.github.AliAlmasiZ.tillDawn.Main;
 import io.github.AliAlmasiZ.tillDawn.models.Settings;
+import io.github.AliAlmasiZ.tillDawn.models.enums.MusicTrack;
 
 import java.util.Set;
 
@@ -19,7 +21,7 @@ public class SettingMenuView implements Disposable {
     private final InputSettingsDialog inputDialog;
     public Slider sfxSlider, musicSlider;
     public CheckBox autoReload, blackAndWhite;
-    public SelectBox</*TODO*/?> musicTrackSelection;
+    public SelectBox<MusicTrack> musicTrackSelection;
     public TextButton back;
 
 
@@ -32,6 +34,16 @@ public class SettingMenuView implements Disposable {
         table.center();
 
         stage.addActor(table);
+
+        musicTrackSelection = new SelectBox<>(skin);
+        musicTrackSelection.setItems(MusicTrack.values());
+        musicTrackSelection.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                Settings.getInstance().musicTrack = musicTrackSelection.getSelected();
+                Settings.getInstance().savePrefs();
+            }
+        });
 
         Label sfxLabel = new Label(Text.SFX_VOLUME.getText() ,skin);
         Label musicLabel = new Label(Text.MUSIC_VOLUME.getText(), skin);
