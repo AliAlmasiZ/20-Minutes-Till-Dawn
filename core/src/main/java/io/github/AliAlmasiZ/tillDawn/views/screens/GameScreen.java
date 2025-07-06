@@ -25,6 +25,7 @@ import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import io.github.AliAlmasiZ.tillDawn.Main;
+import io.github.AliAlmasiZ.tillDawn.controllers.GameController;
 import io.github.AliAlmasiZ.tillDawn.controllers.utils.ControlsManager;
 import io.github.AliAlmasiZ.tillDawn.models.DataBase.AppData;
 import io.github.AliAlmasiZ.tillDawn.models.DataBase.GameData;
@@ -45,15 +46,17 @@ import io.github.AliAlmasiZ.tillDawn.views.HitAnimation;
 import io.github.AliAlmasiZ.tillDawn.views.Text;
 import io.github.AliAlmasiZ.tillDawn.views.dialogs.GameOverDialog;
 import io.github.AliAlmasiZ.tillDawn.views.dialogs.PauseDialog;
+import io.github.AliAlmasiZ.tillDawn.views.dialogs.SelectAbilityDialog;
 
 import java.util.HashSet;
 
 
 public class GameScreen extends ScreenAdapter {
     private final Main main;
+    private final GameController controller;
     private SpriteBatch batch;
     private OrthographicCamera camera;
-    private Viewport viewport;
+    public Viewport viewport;
     public Player player;
 
     private Texture treeTexture;
@@ -65,7 +68,7 @@ public class GameScreen extends ScreenAdapter {
 
 //    private Texture playerTexture;
 //    private Animation<TextureRegion> enemyAnim;
-    private Texture playerBulletTexture;
+    public Texture playerBulletTexture;
     private Texture enemyBulletTexture;
     private Texture xpOrbTexture;
     private Texture backgroundTexture;
@@ -73,7 +76,7 @@ public class GameScreen extends ScreenAdapter {
 
     Array<Tree> trees;
     private Array<Enemy> enemies;
-    private Array<Bullet> playerBullets;
+    public Array<Bullet> playerBullets;
     private Array<Bullet> enemyBullets;
     private Array<XPOrb> xpOrbs;
     private Array<DeathAnimation> deathAnimations;
@@ -101,10 +104,11 @@ public class GameScreen extends ScreenAdapter {
     private ShapeRenderer shapeRenderer;
 
     public boolean isPaused = false;
-    private boolean gameOver = false;
+    public boolean gameOver = false;
+    public boolean isAmmoCheatActive = false;
     private int score = 0, kill = 0;
-    private float gameTimer = 0;
-    private final float MAX_GAME_TIME = Settings.getInstance().gameTime.minutes * 60;
+    public float gameTimer = 0;
+    public final float MAX_GAME_TIME = Settings.getInstance().gameTime.minutes * 60;
 
     private Sound shootSound;
     private Sound enemyHitSound;
@@ -113,7 +117,7 @@ public class GameScreen extends ScreenAdapter {
     private Sound levelUpSound;
 
     // UI Stage and elements
-    private Stage uiStage;
+    public Stage uiStage;
     private Table uiTableRoot;
     private Label scoreLabel;
     private Label killLabel;
@@ -123,12 +127,13 @@ public class GameScreen extends ScreenAdapter {
     private Label weaponLabel;
     private Label ammoLabel;
 
-    private PauseDialog pauseDialog;
+    public PauseDialog pauseDialog;
     private GameOverDialog gameOverDialog;
+    public SelectAbilityDialog selectAbilityDialog;
 
     private Label autoAimStatusLabel;
 
-    private boolean autoAimEnabled = false;
+    public boolean autoAimEnabled = false;
 
     private ProgressBar xpBar;
     private Label xpLabel;
@@ -150,6 +155,7 @@ public class GameScreen extends ScreenAdapter {
     public GameScreen(Main main) {
         this.main = main;
         batch = main.batch;
+        this.controller = new GameController(this);
 
         trees = new Array<>();
         enemies = new Array<>();
@@ -264,6 +270,7 @@ public class GameScreen extends ScreenAdapter {
 
         pauseDialog = new PauseDialog(this);
         gameOverDialog = new GameOverDialog(this);
+        selectAbilityDialog = new SelectAbilityDialog(this);
 
 
 
@@ -414,7 +421,7 @@ public class GameScreen extends ScreenAdapter {
         }
     }
 
-    private Enemy findNearestEnemy() {
+    public Enemy findNearestEnemy() {
         if (player == null || enemies.isEmpty()) {
             return null;
         }
@@ -440,157 +447,11 @@ public class GameScreen extends ScreenAdapter {
         }
         return nearestEnemy;
     }
-    private void handleInput(float delta) {
-        if (gameOver) {
-            if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
-                main.setScreen(new GameScreen(main));
-                dispose();
-                return;
-            }
-        }
-
-        if(Gdx.input.isKeyJustPressed(ControlsManager.getKeyForAction(GameAction.PAUSE)) ||
-            Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            isPaused = !isPaused;
-            if(isPaused) {
-                pauseDialog.show(uiStage);
-            }else {
-                pauseDialog.hide();
-            }
-        }
-        if(Gdx.input.isKeyJustPressed(ControlsManager.getKeyForAction(GameAction.TOGGLE_AUTO_AIM))) {
-            autoAimEnabled = !autoAimEnabled;
-            Gdx.app.log("GameScreen", "Auto-aim " + (autoAimEnabled ? "enabled" : "disabled"));
-        }
-
-        if (player != null && Gdx.input.isKeyJustPressed(ControlsManager.getKeyForAction(GameAction.RELOAD))) {
-            player.startReload();
-        }
-
-        if (isPaused || gameOver || player == null) {
-            if (player != null) player.isMoving = false;
-            return;
-        }
-
-        if(player == null)
-            return;
-
-        boolean movedX = false;
-        boolean movedY = false;
-        float moveSpeed = player.getSpeed() * delta;
-        if (Gdx.input.isKeyPressed(ControlsManager.getKeyForAction(GameAction.MOVE_UP))) {
-            player.position.y += moveSpeed;
-            movedY = true;
-        }
-        if (Gdx.input.isKeyPressed(ControlsManager.getKeyForAction(GameAction.MOVE_DOWN))) {
-            player.position.y -= moveSpeed;
-            movedY = true;
-        }
-        if (Gdx.input.isKeyPressed(ControlsManager.getKeyForAction(GameAction.MOVE_LEFT))) {
-            player.position.x -= moveSpeed;
-            movedX = true;
-        }
-        if (Gdx.input.isKeyPressed(ControlsManager.getKeyForAction(GameAction.MOVE_RIGHT))) {
-            player.position.x += moveSpeed;
-            movedX = true;
-        }
-        player.isMoving = movedX || movedY;
-
-//        Vector2 mousePos = new Vector2(Gdx.input.getX(), Gdx.input.getY());
-//        viewport.unproject(mousePos);
-//
-//        float playerCenterX = player.position.x + playerTexture.getWidth() / 2f;
-//        float playerCenterY = player.position.y + playerTexture.getHeight() / 2f;
-//
-//        float angleRadians = MathUtils.atan2(mousePos.y - playerCenterY, mousePos.x - playerCenterX);
-//        float angleDegrees = angleRadians * MathUtils.radiansToDegrees;
-//
-//        player.setAimAngle(angleDegrees);
-
-        // Aiming Logic
-        if (autoAimEnabled) {
-            Enemy targetEnemy = findNearestEnemy();
-            if (targetEnemy != null) {
-                float pCenterX = player.position.x + player.getWidth() / 2f, pCenterY = player.position.y + player.getHeight() / 2f;
-                float eCenterX = targetEnemy.position.x + targetEnemy.getWidth() / 2f, eCenterY = targetEnemy.position.y + targetEnemy.getHeight() / 2f;
-                player.setAimAngle(MathUtils.atan2(eCenterY - pCenterY, eCenterX - pCenterX) * MathUtils.radiansToDegrees);
-                Vector2 enemyScreenPos = viewport.project(new Vector2(eCenterX, eCenterY));
-                Gdx.input.setCursorPosition((int) enemyScreenPos.x, Gdx.graphics.getHeight() - (int) enemyScreenPos.y);
-            } else {
-                manualAim();
-            }
-        } else {
-            manualAim();
-        }
-
-//        if (Gdx.input.isButtonJustPressed(Input.Buttons.LEFT)) {
-//
-//            if (TimeUtils.millis() - player.lastShotTime > player.shootCooldown || true) {
-//                spawnBullet();
-//                player.lastShotTime = TimeUtils.millis();
-//            }
-//        }
-
-        if (Gdx.input.isButtonPressed(ControlsManager.getKeyForAction(GameAction.SHOOT))) { // isButtonPressed for continuous fire
-            if (player.canShoot() && TimeUtils.millis() - player.lastShotTime > player.shootCooldown) {
-                spawnPlayerBullet();
-                player.lastShotTime = TimeUtils.millis();
-                if (!player.isReloading) player.currentAmmo--; // Decrement ammo if not reloading
-                if (player.currentAmmo == 0 && !player.isReloading && Settings.getInstance().autoReload) {
-                    player.startReload();
-                }
-            }
-        }
 
 
-        //Cheats
-        if (Gdx.input.isKeyJustPressed(Input.Keys.F1)) {
-            player.health = player.maxHealth;
-        }
-        if (Gdx.input.isKeyJustPressed(Input.Keys.F2)) {
-            gameTimer += 60;
-        }
-        if(Gdx.input.isKeyJustPressed(Input.Keys.F3)) {
-            player.levelUp();
-            AbilityType[] allAbilities = AbilityType.values();
-            player.applyAbility(allAbilities[MathUtils.random(allAbilities.length - 1)]);
-        }
-    }
 
-    private void manualAim() {
-        Vector2 mousePos = new Vector2(Gdx.input.getX(), Gdx.input.getY());
-        viewport.unproject(mousePos);
-        float pCenterX = player.position.x + player.getWidth() / 2f;
-        float pCenterY = player.position.y + player.getHeight() / 2f;
-        player.setAimAngle(MathUtils.atan2(mousePos.y - pCenterY, mousePos.x - pCenterX) * MathUtils.radiansToDegrees);
-    }
 
-    private void spawnPlayerBullet() {
-        if (player == null) return;
-        Vector2 mousePos = new Vector2(Gdx.input.getX(), Gdx.input.getY());
-        viewport.unproject(mousePos);
 
-        float playerCenterX = player.position.x + player.getWidth() / 2f;
-        float playerCenterY = player.position.y + player.getHeight() / 2f;
-
-        float baseAngleRad = MathUtils.atan2(mousePos.y - playerCenterY, mousePos.x - playerCenterX);
-
-        int effectiveDamage = player.getEffectiveDamage();
-
-        for (int i = 0; i < player.projectilesPerShot; i++) {
-            float currentAngleRad = baseAngleRad;
-            if (player.currentWeapon == WeaponType.SHOTGUN && player.projectilesPerShot > 1) {
-                float spreadRange = 30f;
-                float randomSpread = MathUtils.random(-spreadRange / 2f, spreadRange / 2f);
-                currentAngleRad = baseAngleRad + (randomSpread * MathUtils.degreesToRadians);
-            }
-            // For Dual SMGs, if they are meant to fire from slightly different positions or angles,
-            // that logic would go here too, potentially alternating. For now, they fire like revolver.
-
-            playerBullets.add(new Bullet(playerBulletTexture,
-                new Vector2(playerCenterX, playerCenterY), currentAngleRad, effectiveDamage, true));
-        }
-    }
 
 
     public void spawnEnemyBullet(Vector2 startPos, float angleRad, int damage) {
@@ -835,8 +696,7 @@ public class GameScreen extends ScreenAdapter {
                 xpOrbs.removeIndex(i);
                 if(player.xp >= player.xpToNextLevel) {
                     player.levelUp();
-                    AbilityType[] allAbilities = AbilityType.values();
-                    player.applyAbility(allAbilities[MathUtils.random(allAbilities.length - 1)]);
+                    selectAbilityDialog.show(uiStage);
                 }
             }
         }
@@ -880,7 +740,7 @@ public class GameScreen extends ScreenAdapter {
 
     @Override
     public void render(float delta) {
-        handleInput(delta);
+        controller.handleInput(delta);
         if(!isPaused && !gameOver) {
             updateGameLogic(delta);
         }
@@ -985,18 +845,19 @@ public class GameScreen extends ScreenAdapter {
 
     @Override
     public void dispose() {
+        AppData.getAppData().activeUser.setLastGame(null);
         Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
-        if (customCursor != null) {
-            customCursor.dispose(); // Dispose the custom cursor object
-            customCursor = null;
-        }
-        if(progressBarKnobTex != null) progressBarKnobTex.dispose();
-        if (progressBarBgTex != null) progressBarBgTex.dispose();
-        if(lightingOverlayTexture != null) lightingOverlayTexture.dispose();
-        if(font != null) font.dispose();
-        if(shapeRenderer != null) shapeRenderer.dispose();
-        if(uiStage != null) uiStage.dispose();
-        if(treeTexture != null) treeTexture.dispose();
+//        if (customCursor != null) {
+//            customCursor.dispose(); // Dispose the custom cursor object
+//            customCursor = null;
+//        }
+//        if(progressBarKnobTex != null) progressBarKnobTex.dispose();
+//        if (progressBarBgTex != null) progressBarBgTex.dispose();
+//        if(lightingOverlayTexture != null) lightingOverlayTexture.dispose();
+//        if(font != null) font.dispose();
+//        if(shapeRenderer != null) shapeRenderer.dispose();
+//        if(uiStage != null) uiStage.dispose();
+//        if(treeTexture != null) treeTexture.dispose();
 
         trees.clear();
         enemies.clear();
@@ -1005,7 +866,6 @@ public class GameScreen extends ScreenAdapter {
         xpOrbs.clear();
         deathAnimations.clear();
         hitAnimations.clear();
-        AppData.getAppData().activeUser.setLastGame(null);
     }
 
     @Override
@@ -1035,8 +895,11 @@ public class GameScreen extends ScreenAdapter {
         User user = AppData.getAppData().activeUser;
         user.setKill(user.getKill() + kill);
         user.setScore(user.getScore() + score);
-        user.setLongestSurvivalTime(Math.max(MAX_GAME_TIME - gameTimer , user.getLongestSurvivalTime()));
+        user.setLongestSurvivalTime(Math.max(gameTimer , user.getLongestSurvivalTime()));
     }
 
+    public void addAbility(AbilityType type) {
+        player.applyAbility(type);
+    }
 }
 

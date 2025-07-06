@@ -128,6 +128,8 @@ public class User {
     }
 
     public Player getPlayer() {
+        if(player == null)
+            player = new Player();
         return player;
     }
 

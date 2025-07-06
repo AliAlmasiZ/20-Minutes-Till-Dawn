@@ -53,4 +53,8 @@ public class AppData {
         PlayerDAO dao = new PlayerDAO(null);
         dao.deleteUser(user);
     }
+
+    public List<User> getAllUsers(){
+        return new ArrayList<>(allUsers);
+    }
 }

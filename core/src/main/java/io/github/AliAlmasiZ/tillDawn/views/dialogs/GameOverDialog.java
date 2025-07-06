@@ -23,8 +23,8 @@ public class GameOverDialog extends Dialog {
     BitmapFont font;
     String survivalTime, outcome;
     int kill, score;
-    Screen gameScreen;
-    public GameOverDialog(Screen gameScreen) {
+    GameScreen gameScreen;
+    public GameOverDialog(GameScreen gameScreen) {
         super("", GameAssetManager.getGameAssetManager().pixthulhuuiSkin);
         this.gameScreen = gameScreen;
         font = new BitmapFont(Gdx.files.internal(GameAssetManager.getGameAssetManager().CHEVY_RAY_LANTERN));

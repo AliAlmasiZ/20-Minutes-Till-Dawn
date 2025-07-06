@@ -121,4 +121,19 @@ public class PlayerDAO {
         return deletedCount;
     }
 
+    public void updateAllPlayers(List<User> users) {
+        Transaction tx = null;
+        try (Session session = HibernateUtil.getSessionFactory().openSession()) {
+            tx = session.beginTransaction();
+
+            for (User user : users) {
+                session.update(user); // or session.saveOrUpdate(player);
+            }
+
+            tx.commit();
+        } catch (Exception e) {
+            if (tx != null) tx.rollback();
+            e.printStackTrace();
+        }
+    }
 }

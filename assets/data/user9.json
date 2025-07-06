@@ -1,0 +1,10 @@
+{
+  "id": 9,
+  "username": "Test",
+  "password": "TestTest2@",
+  "securityAnswer": "",
+  "score": 0,
+  "kill": 0,
+  "longestSurvivalTime": 0.0,
+  "avatarPath": "avatars/avatar2.png"
+}

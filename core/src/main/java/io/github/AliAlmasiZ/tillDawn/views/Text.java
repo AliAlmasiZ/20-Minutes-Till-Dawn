@@ -73,7 +73,7 @@ public enum Text {
     YOU_SURVIVED("YOU SURVIVED!", "ma zendeh moondim!"),
     SURVIVAL_TIME("survival time", "zaman zende mandan"),
     KILL_COUNT("kill count", "koshte ha"),
-
+    SELECT_ABILITY("select ability", "tavanaii ra entakhab konid")
 
 
     ;

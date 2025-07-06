@@ -37,6 +37,7 @@ public class Player implements Serializable {
     @Transient
     private Animation<TextureRegion> idleAnimation;
     private float stateTime = 0f;
+    private float timer = 0f;
     public boolean isMoving = false;
     private float aimAngleDegrees = 0f;
 
@@ -50,8 +51,8 @@ public class Player implements Serializable {
     public int xp = 0;
     public int xpToNextLevel = 100;
 
-    public long lastShotTime = 0;
-    public float shootCooldown = 200;
+    public float lastShotTime = 0f;
+    public float shootCooldown = 0.2f;
 
     public long lastHitTime = 0;
     public long invincibilityDuration = 1000;
@@ -70,7 +71,7 @@ public class Player implements Serializable {
     private ObjectSet<AbilityType> permanentAbilities;
     private float damageBoostEndTime = 0;
     private float speedBoostEndTime = 0;
-    private static final float BUFF_DURATION = 10000;
+    private static final float BUFF_DURATION = 10f;
 
 
     public Player() {
@@ -130,7 +131,7 @@ public class Player implements Serializable {
 
     public int getEffectiveDamage() {
         float damageMultiplier = 1.0f;
-        if (TimeUtils.millis() < damageBoostEndTime) {
+        if (stateTime < damageBoostEndTime) {
             damageMultiplier += 0.25f; // DAMAGER ability: +25%
         }
         return (int)(baseWeaponDamage * damageMultiplier);
@@ -149,11 +150,11 @@ public class Player implements Serializable {
             }
         }
 
-        if (TimeUtils.millis() >= damageBoostEndTime && damageBoostEndTime != 0) {
+        if (stateTime >= damageBoostEndTime && damageBoostEndTime != 0) {
             damageBoostEndTime = 0;
             Gdx.app.log("Player", "Damage boost expired.");
         }
-        if (TimeUtils.millis() >= speedBoostEndTime && speedBoostEndTime != 0) {
+        if (stateTime >= speedBoostEndTime && speedBoostEndTime != 0) {
             speed = baseSpeed;
             speedBoostEndTime = 0;
             Gdx.app.log("Player", "Speed boost expired. Speed: " + speed);
@@ -203,7 +204,7 @@ public class Player implements Serializable {
                 Gdx.app.log("Player", "VITALITY applied. Max HP: " + maxHealth);
                 break;
             case DAMAGER:
-                damageBoostEndTime = TimeUtils.millis() + BUFF_DURATION;
+                damageBoostEndTime = stateTime + BUFF_DURATION;
                 Gdx.app.log("Player", "DAMAGER applied. Damage boost active.");
                 break;
             case PROCREASE:
@@ -221,7 +222,7 @@ public class Player implements Serializable {
                 break;
             case SPEEDY:
                 this.speed = baseSpeed * 2f;
-                speedBoostEndTime = TimeUtils.millis() + BUFF_DURATION;
+                speedBoostEndTime = stateTime + BUFF_DURATION;
                 Gdx.app.log("Player", "SPEEDY applied. Speed: " + speed);
                 break;
         }
@@ -286,6 +287,7 @@ public class Player implements Serializable {
         this.xp -= this.xpToNextLevel;
         if(this.xp < 0) this.xp = 0;
         this.xpToNextLevel = (int) (this.xpToNextLevel * 1.5f);
+
         //ability handle in gameScreen
     }
 

@@ -8,6 +8,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import io.github.AliAlmasiZ.tillDawn.Main;
 import io.github.AliAlmasiZ.tillDawn.models.DataBase.AppData;
+import io.github.AliAlmasiZ.tillDawn.models.DataBase.PlayerDAO;
 import io.github.AliAlmasiZ.tillDawn.models.GameAssetManager;
 import io.github.AliAlmasiZ.tillDawn.models.User;
 import io.github.AliAlmasiZ.tillDawn.views.MainMenuView;
@@ -17,6 +18,9 @@ public class MainMenuScreen implements Screen {
     private final MainMenuView view;
 
     public MainMenuScreen(Main main) {
+        PlayerDAO dao = new PlayerDAO(null);
+        dao.updateAllPlayers(AppData.getAppData().getAllUsers());
+
         this.main = main;
         this.view = new MainMenuView(GameAssetManager.getGameAssetManager().pixthulhuuiSkin);
 
