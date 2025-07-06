@@ -34,12 +34,15 @@ import io.github.AliAlmasiZ.tillDawn.models.Entities.Tree;
 import io.github.AliAlmasiZ.tillDawn.models.Entities.XPOrb;
 import io.github.AliAlmasiZ.tillDawn.models.GameAssetManager;
 import io.github.AliAlmasiZ.tillDawn.models.Player;
+import io.github.AliAlmasiZ.tillDawn.models.Settings;
 import io.github.AliAlmasiZ.tillDawn.models.enums.AbilityType;
 import io.github.AliAlmasiZ.tillDawn.models.enums.EnemyType;
 import io.github.AliAlmasiZ.tillDawn.models.enums.GameAction;
 import io.github.AliAlmasiZ.tillDawn.models.enums.WeaponType;
 import io.github.AliAlmasiZ.tillDawn.views.DeathAnimation;
+import io.github.AliAlmasiZ.tillDawn.views.HitAnimation;
 import io.github.AliAlmasiZ.tillDawn.views.Text;
+import io.github.AliAlmasiZ.tillDawn.views.dialogs.PauseDialog;
 
 import java.util.HashSet;
 
@@ -49,7 +52,7 @@ public class GameScreen extends ScreenAdapter {
     private SpriteBatch batch;
     private OrthographicCamera camera;
     private Viewport viewport;
-    private Player player;
+    public Player player;
 
     private Texture treeTexture;
     private Animation<TextureRegion> tentacleMonsterAnim;
@@ -72,6 +75,7 @@ public class GameScreen extends ScreenAdapter {
     private Array<Bullet> enemyBullets;
     private Array<XPOrb> xpOrbs;
     private Array<DeathAnimation> deathAnimations;
+    private Array<HitAnimation> hitAnimations;
 
     private HashSet<Long> populatedTreeCells;
     private static final int TREE_CELL_SIZE = 1600;
@@ -94,11 +98,11 @@ public class GameScreen extends ScreenAdapter {
     private BitmapFont font;
     private ShapeRenderer shapeRenderer;
 
-    private boolean isPaused = false;
+    public boolean isPaused = false;
     private boolean gameOver = false;
     private int score = 0;
     private float gameTimer = 0;
-    private final float MAX_GAME_TIME = 20 * 60;
+    private final float MAX_GAME_TIME = Settings.getInstance().gameTime.minutes * 60;
 
     private Sound shootSound;
     private Sound enemyHitSound;
@@ -116,6 +120,9 @@ public class GameScreen extends ScreenAdapter {
     private Label weaponLabel;
     private Label ammoLabel;
     private Label pauseMessageLabel;
+
+    private PauseDialog pauseDialog;
+
     private Label gameOverMessageLabel;
     private Label finalScoreLabel;
     private Label restartMessageLabel;
@@ -148,6 +155,8 @@ public class GameScreen extends ScreenAdapter {
 
     @Override
     public void show() {
+
+
         ControlsManager.refreshControls();
 
 //        viewport = new FitViewport(GAME_WORLD_WIDTH, GAME_WORLD_HEIGHT, camera);
@@ -188,6 +197,7 @@ public class GameScreen extends ScreenAdapter {
         enemyBullets = new Array<>();
         xpOrbs = new Array<>();
         deathAnimations = new Array<>();
+        hitAnimations = new Array<>();
         shapeRenderer = new ShapeRenderer();
 
         populatedTreeCells = new HashSet<>();
@@ -249,6 +259,9 @@ public class GameScreen extends ScreenAdapter {
         ammoLabel = new Label(Text.AMMO + ": 6/6", labelStyle);
         autoAimStatusLabel = new Label(Text.AUTO_AIM + ": OFF", labelStyle);
 
+
+
+        pauseDialog = new PauseDialog(this);
 
         //TODO: make dialog
         pauseMessageLabel = new Label("PAUSED (Press " + ControlsManager.getKeyNameForAction(GameAction.PAUSE) + " or ESC to resume)", labelStyle);
@@ -315,6 +328,10 @@ public class GameScreen extends ScreenAdapter {
         lastEyebatSpawnTime = TimeUtils.millis();
         canSpawnEyebats = false;
         elderBossHasSpawned = false;
+
+        if (isPaused) {
+            pauseDialog.show(uiStage);
+        }
     }
 
 
@@ -443,6 +460,11 @@ public class GameScreen extends ScreenAdapter {
         if(Gdx.input.isKeyJustPressed(ControlsManager.getKeyForAction(GameAction.PAUSE)) ||
             Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
             isPaused = !isPaused;
+            if(isPaused) {
+                pauseDialog.show(uiStage);
+            }else {
+                pauseDialog.hide();
+            }
         }
         if(Gdx.input.isKeyJustPressed(ControlsManager.getKeyForAction(GameAction.TOGGLE_AUTO_AIM))) {
             autoAimEnabled = !autoAimEnabled;
@@ -706,6 +728,24 @@ public class GameScreen extends ScreenAdapter {
         for (int i = xpOrbs.size - 1; i >= 0; i--) {
             xpOrbs.get(i).update(delta);
         }
+
+        for(int i = deathAnimations.size - 1; i >= 0; i--) {
+            DeathAnimation anim = deathAnimations.get(i);
+            anim.update(delta);
+            if(anim.isFinished()) {
+                deathAnimations.removeIndex(i);
+            }
+        }
+
+        for(int i = hitAnimations.size - 1; i >= 0; i--) {
+            HitAnimation anim = hitAnimations.get(i);
+            anim.update(delta);
+            if (anim.isFinished()) {
+                hitAnimations.removeIndex(i);
+            }
+        }
+
+
         if (player != null) checkCollisions();
     }
 
@@ -713,6 +753,7 @@ public class GameScreen extends ScreenAdapter {
         if(player == null) return;
         Rectangle playerBounds = player.getBounds();
 
+        // Player Bullets vs Enemies
         for (int i = playerBullets.size - 1; i >= 0; i--) {
             Bullet bullet = playerBullets.get(i);
             if(bullet == null || !bullet.isPlayerBullet) continue;
@@ -722,17 +763,30 @@ public class GameScreen extends ScreenAdapter {
                 if(bulletBounds.overlaps(enemy.getBounds())) {
                     playerBullets.removeIndex(i);
                     enemy.takeDamage(bullet.damage);
+
+                    Vector2 knockbackDir = new Vector2(bullet.getVelocity()).nor();
+                    float knockbackForce = 500f;
+                    enemy.applyKnockback(knockbackDir, knockbackForce);
+
                     if(enemy.health <= 0) {
-                        Vector2 enemyPosition = new Vector2(enemies.get(j).position);
+                        Vector2 enemyCenterPos = new Vector2(
+                            enemy.position.x + enemy.getWidth()/2f,
+                            enemy.position.y + enemy.getHeight()/2f);
                         enemies.removeIndex(j);
                         score += 10;
-                        spawnXPOrb(enemyPosition);
+                        spawnXPOrb(enemyCenterPos);
+
+                        Animation<TextureRegion> deathAnim = GameAssetManager.getGameAssetManager().deathAnimation;
+                        if (deathAnim != null) {
+                            deathAnimations.add(new DeathAnimation(deathAnim, enemyCenterPos));
+                        }
                     }
                     break;
                 }
             }
         }
 
+        //Enemy Bullets vs Player
         for(int i = enemyBullets.size - 1; i >= 0; i--) {
             Bullet bullet = enemyBullets.get(i);
             if(bullet == null || bullet.isPlayerBullet) return;
@@ -740,6 +794,18 @@ public class GameScreen extends ScreenAdapter {
                 if (TimeUtils.millis() - player.lastHitTime > player.invincibilityDuration) {
                     player.takeDamage(bullet.damage);
                     enemyBullets.removeIndex(i);
+
+                    Animation<TextureRegion> hitAnim = GameAssetManager.getGameAssetManager().hitAnimation;
+                    if(hitAnim != null) {
+                        hitAnimations.add(new HitAnimation(
+                                hitAnim,
+                                new Vector2(
+                                    player.position.x + player.getWidth() / 2,
+                                    player.position.y + player.getHeight() / 2)
+                            )
+                        );
+                    }
+
                     if (player.health <= 0) { gameOver = true; return; }
                 }
             }
@@ -803,12 +869,15 @@ public class GameScreen extends ScreenAdapter {
         autoAimStatusLabel.setText(Text.AUTO_AIM + ": " + (autoAimEnabled ? Text.ON : Text.OFF));
 
 
+
+
         if (isPaused && !gameOver) {
-            messagesTable.setVisible(true);
-            pauseMessageLabel.setVisible(true);
-            gameOverMessageLabel.setVisible(false);
-            finalScoreLabel.setVisible(false);
-            restartMessageLabel.setVisible(false);
+
+//            messagesTable.setVisible(true);
+//            pauseMessageLabel.setVisible(true);
+//            gameOverMessageLabel.setVisible(false);
+//            finalScoreLabel.setVisible(false);
+//            restartMessageLabel.setVisible(false);
         } else if (gameOver) {
             messagesTable.setVisible(true);
             pauseMessageLabel.setVisible(false);
@@ -884,6 +953,7 @@ public class GameScreen extends ScreenAdapter {
         for(Bullet bullet : playerBullets) bullet.draw(batch);
         for (Bullet bullet : enemyBullets) bullet.draw(batch);
         for (DeathAnimation deathAnimation : deathAnimations) deathAnimation.draw(batch);
+        for (HitAnimation hitAnimation : hitAnimations) hitAnimation.draw(batch);
         batch.end();
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
@@ -948,10 +1018,15 @@ public class GameScreen extends ScreenAdapter {
         enemyBullets.clear();
         xpOrbs.clear();
         deathAnimations.clear();
+        hitAnimations.clear();
     }
 
     @Override
     public void hide() {
+        if(isPaused) {
+            pauseDialog.hide();
+        }
+
         Gdx.graphics.setSystemCursor(Cursor.SystemCursor.Arrow);
         if (customCursor != null) {
             customCursor.dispose(); // Dispose the custom cursor object
@@ -959,5 +1034,6 @@ public class GameScreen extends ScreenAdapter {
         }
         Gdx.input.setInputProcessor(null);
     }
+
 }
 

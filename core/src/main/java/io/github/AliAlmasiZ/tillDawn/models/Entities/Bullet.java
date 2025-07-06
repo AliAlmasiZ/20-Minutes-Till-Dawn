@@ -65,6 +65,10 @@ public class Bullet {
         return bounds;
     }
 
+    public Vector2 getVelocity() {
+        return velocity;
+    }
+
     public boolean isOffScreen(OrthographicCamera camera, Viewport viewport) {
         float camX = camera.position.x;
         float camY = camera.position.y;

@@ -1,18 +1,15 @@
-package io.github.AliAlmasiZ.tillDawn.views;
+package io.github.AliAlmasiZ.tillDawn.views.dialogs;
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import io.github.AliAlmasiZ.tillDawn.controllers.ProfileController;
-import io.github.AliAlmasiZ.tillDawn.models.DataBase.AppData;
-import io.github.AliAlmasiZ.tillDawn.models.Entities.Bullet;
 import io.github.AliAlmasiZ.tillDawn.models.GameAssetManager;
-import io.github.AliAlmasiZ.tillDawn.models.User;
+import io.github.AliAlmasiZ.tillDawn.views.ProfileMenuView;
+import io.github.AliAlmasiZ.tillDawn.views.Text;
 
 import javax.swing.*;
-import java.util.ArrayList;
-import java.util.List;
 
 public class AvatarchooseDialog extends Dialog {
     ProfileController controller;

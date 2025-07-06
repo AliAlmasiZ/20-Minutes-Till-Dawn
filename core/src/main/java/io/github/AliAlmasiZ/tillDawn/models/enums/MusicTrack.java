@@ -18,4 +18,8 @@ public enum MusicTrack {
     }
 
 
+    @Override
+    public String toString() {
+        return this.name;
+    }
 }

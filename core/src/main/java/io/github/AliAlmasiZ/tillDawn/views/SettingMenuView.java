@@ -10,10 +10,10 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import io.github.AliAlmasiZ.tillDawn.Main;
+import io.github.AliAlmasiZ.tillDawn.models.DataBase.GameData;
 import io.github.AliAlmasiZ.tillDawn.models.Settings;
 import io.github.AliAlmasiZ.tillDawn.models.enums.MusicTrack;
-
-import java.util.Set;
+import io.github.AliAlmasiZ.tillDawn.views.dialogs.InputSettingsDialog;
 
 public class SettingMenuView implements Disposable {
     private final Stage stage;
@@ -123,6 +123,10 @@ public class SettingMenuView implements Disposable {
 
 
 
+    }
+
+    public void show() {
+        Gdx.input.setInputProcessor(stage);
     }
 
     public void render(float delta) {

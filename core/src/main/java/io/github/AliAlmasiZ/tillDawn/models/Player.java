@@ -88,7 +88,7 @@ public class Player implements Serializable {
 
         this.bounds = new Rectangle(); // Will be set in update()
 
-        equipWeapon(WeaponType.REVOLVER); // Start with revolver
+        equipWeapon(WeaponType.REVOLVER);
         this.health = this.maxHealth;
 
     }

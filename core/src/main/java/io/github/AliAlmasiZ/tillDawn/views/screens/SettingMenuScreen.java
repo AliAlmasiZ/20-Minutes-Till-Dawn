@@ -27,6 +27,10 @@ public class SettingMenuScreen extends ScreenAdapter {
     }
 
 
+    @Override
+    public void show() {
+        view.show();
+    }
 
     @Override
     public void resize(int width, int height) {

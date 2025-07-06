@@ -48,7 +48,8 @@ public enum Text {
     RESUME("resume", "edame"),
     SHOW_CHEATCODES("show cheatcodes", "namayesh cheatcode ha"),
     SHOW_ABILITIES("show abilities", "namayesh tavanaei ha"),
-    EXIT("exit/giveUp", "khorooj"),
+    GIVE_UP("giveUp", "taslim"),
+    SAVE_AND_EXIT("Save and Exit", "exit"),
 
 
     //GAME

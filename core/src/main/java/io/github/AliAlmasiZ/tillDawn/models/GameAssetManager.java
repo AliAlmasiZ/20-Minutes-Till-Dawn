@@ -25,6 +25,16 @@ public class GameAssetManager {
     public Animation<TextureRegion> eyebatMonsterAnim;
     public Animation<TextureRegion> elderBossAnim;
 
+    public Animation<TextureRegion> deathAnimation;
+    private final String DeathFX_0 = "Images/Sprite/DeathFX_0.png";
+    private final String DeathFX_1 = "Images/Sprite/DeathFX_1.png";
+    private final String DeathFX_2 = "Images/Sprite/DeathFX_2.png";
+    private final String DeathFX_3 = "Images/Sprite/DeathFX_3.png";
+    public Animation<TextureRegion> hitAnimation;
+    private final String HitImpactFX_0 = "Images/Sprite/HitImpactFX_0.png";
+    private final String HitImpactFX_1 = "Images/Sprite/HitImpactFX_1.png";
+
+
 
 
 
@@ -122,6 +132,13 @@ public class GameAssetManager {
         manager.load(character1Run2, Texture.class);
         manager.load(character1Run3, Texture.class);
 
+        manager.load(DeathFX_0, Texture.class);
+        manager.load(DeathFX_1, Texture.class);
+        manager.load(DeathFX_2, Texture.class);
+        manager.load(DeathFX_3, Texture.class);
+        manager.load(HitImpactFX_0, Texture.class);
+        manager.load(HitImpactFX_1, Texture.class);
+
         manager.load(brainMonster0, Texture.class);
         manager.load(brainMonster1, Texture.class);
         manager.load(brainMonster2, Texture.class);
@@ -184,6 +201,16 @@ public class GameAssetManager {
         elderBossFrames.add(new TextureRegion(manager.get(hasturBoss4, Texture.class)));
         elderBossFrames.add(new TextureRegion(manager.get(hasturBoss5, Texture.class)));
 
+        Array<TextureRegion> deathFrames = new Array<>();
+        deathFrames.add(new TextureRegion(manager.get(DeathFX_0, Texture.class)));
+        deathFrames.add(new TextureRegion(manager.get(DeathFX_1, Texture.class)));
+        deathFrames.add(new TextureRegion(manager.get(DeathFX_2, Texture.class)));
+        deathFrames.add(new TextureRegion(manager.get(DeathFX_3, Texture.class)));
+
+        Array<TextureRegion> hitFrames = new Array<>();
+        hitFrames.add(new TextureRegion(manager.get(HitImpactFX_0, Texture.class)));
+        hitFrames.add(new TextureRegion(manager.get(HitImpactFX_1, Texture.class)));
+
 
 
 
@@ -197,6 +224,8 @@ public class GameAssetManager {
         brainMonsterAnim = new Animation<>(0.1f, brainMonsterFrames, Animation.PlayMode.LOOP);
         eyebatMonsterAnim = new Animation<>(0.1f, eyebatFrames, Animation.PlayMode.LOOP);
         elderBossAnim = new Animation<>(0.1f, elderBossFrames, Animation.PlayMode.LOOP);
+        deathAnimation = new Animation<>(0.08f, deathFrames);
+        hitAnimation = new Animation<>(0.06f, hitFrames);
     }
 
     public void dispose() {

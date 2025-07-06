@@ -2,7 +2,9 @@ package io.github.AliAlmasiZ.tillDawn.models;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Preferences;
+import io.github.AliAlmasiZ.tillDawn.models.enums.HeroType;
 import io.github.AliAlmasiZ.tillDawn.models.enums.MusicTrack;
+import io.github.AliAlmasiZ.tillDawn.models.enums.WeaponType;
 
 public class Settings {
     private static Settings instance;
@@ -18,6 +20,11 @@ public class Settings {
     public MusicTrack musicTrack;
     public boolean autoReload;
     public boolean blackWhite;
+    public Time gameTime;
+    public WeaponType weaponType;
+    public HeroType heroType;
+
+
 
 
     private Settings() {
@@ -25,8 +32,9 @@ public class Settings {
         musicVolume = prefs.getFloat(Fields.MUSIC_VOLUME.name(), 1f);
         autoReload = prefs.getBoolean(Fields.AUTO_RELOAD.name(), false);
         blackWhite = prefs.getBoolean(Fields.BLACK_N_WHITE.name(), false);
-        musicTrack = MusicTrack.StrangerThings;
-//        musicTrack = MusicTrack.valueOf(prefs.getString(Fields.MUSIC_TRACK.name(), MusicTrack.StrangerThings.name()));
+        musicTrack = MusicTrack.valueOf(prefs.getString(Fields.MUSIC_TRACK.name(), MusicTrack.StrangerThings.name()));
+        gameTime = Time.valueOf(prefs.getString(Fields.TIME.name(), Time.FIVE.name()));
+        heroType = HeroType.valueOf(prefs.getString(Fields.HERO.name(), HeroType.SHANA.name()));
         savePrefs();
     }
 
@@ -36,6 +44,8 @@ public class Settings {
         prefs.putBoolean(Fields.BLACK_N_WHITE.name(), blackWhite);
         prefs.putBoolean(Fields.AUTO_RELOAD.name(), autoReload);
         prefs.putString(Fields.MUSIC_TRACK.name(), musicTrack.name());
+        prefs.putString(Fields.TIME.name(), gameTime.name());
+        prefs.putString(Fields.HERO.name(), heroType.name());
 
         prefs.flush();
     }
@@ -51,8 +61,23 @@ public class Settings {
         MUSIC_VOLUME,
         AUTO_RELOAD,
         BLACK_N_WHITE,
-        MUSIC_TRACK
+        MUSIC_TRACK,
+        TIME,
+        HERO
         ;
+    }
+
+    public enum Time {
+        TWO(2),
+        FIVE(5),
+        TEN(10),
+        TWENTY(20);
+
+        public int minutes;
+
+        Time(int minutes) {
+            this.minutes = minutes;
+        }
     }
 
 

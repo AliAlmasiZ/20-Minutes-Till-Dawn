@@ -24,6 +24,9 @@ public class Enemy {
     public Rectangle bounds;
     public EnemyType type;
 
+    private Vector2 knockbackVelocity = new Vector2();
+    private static final float KNOCKBACK_FRICTION = 0.90f;
+
     // For Eyebat shooting
     private long lastShotTimeEyebat;
     private static final float EYEBAT_SHOOT_COOLDOWN = 3000; // 3 seconds in milliseconds
@@ -50,22 +53,23 @@ public class Enemy {
         this.sprite.setPosition(position.x, position.y);
         this.sprite.setOriginCenter();
 
+        this.damage = 1;
         switch (type) {
             case TENTACLE_MONSTER :
                 this.maxHealth = 25;
                 this.speed = 80f;
-                this.damage = 10;
+//                this.damage = 10;
                 break;
             case EYEBAT :
                 this.maxHealth = 50;
                 this.speed = 60f;
-                this.damage = 5;
+//                this.damage = 5;
                 this.lastShotTimeEyebat = TimeUtils.millis();
                 break;
             case ELDER_BOSS :
                 this.maxHealth = 400;
                 this.speed = 50f;
-                this.damage = 20;
+//                this.damage = 20;
                 this.lastDashTimeElder = TimeUtils.millis();
                 this.dashTargetPositionElder = new Vector2();
                 break;
@@ -74,9 +78,22 @@ public class Enemy {
         this.bounds = new Rectangle(sprite.getX(), sprite.getY(), sprite.getWidth(), sprite.getHeight());
     }
 
+    public void applyKnockback(Vector2 direction, float force) {
+        knockbackVelocity.add(direction.nor().scl(force));
+    }
+
     public void update(float delta, Vector2 playerCenterPosition, GameScreen gameScreen) {
         stateTime += delta;
         TextureRegion currentRegion = animation.getKeyFrame(stateTime, true);
+
+        if(!knockbackVelocity.isZero()) {
+            position.add(knockbackVelocity.x * delta, knockbackVelocity.y * delta);
+            knockbackVelocity.scl(KNOCKBACK_FRICTION);
+
+            if(knockbackVelocity.len2() < 1f) {
+                knockbackVelocity.setZero();
+            }
+        }
 
         sprite.setRegion(currentRegion);
         sprite.setSize(currentRegion.getRegionWidth(), currentRegion.getRegionHeight());

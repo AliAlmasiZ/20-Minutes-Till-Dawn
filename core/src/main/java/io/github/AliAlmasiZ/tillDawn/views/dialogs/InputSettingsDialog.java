@@ -1,4 +1,4 @@
-package io.github.AliAlmasiZ.tillDawn.views;
+package io.github.AliAlmasiZ.tillDawn.views.dialogs;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -10,6 +10,7 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.ObjectMap;
 import io.github.AliAlmasiZ.tillDawn.controllers.utils.ControlsManager;
 import io.github.AliAlmasiZ.tillDawn.models.enums.GameAction;
+import io.github.AliAlmasiZ.tillDawn.views.Text;
 
 public class InputSettingsDialog extends Dialog {
 

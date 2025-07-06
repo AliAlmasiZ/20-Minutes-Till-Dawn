@@ -12,7 +12,7 @@ public class Tree {
     public Vector2 position;
     private transient Sprite sprite;
     public transient Rectangle bounds;
-    public static final int TREE_DAMAGE = 5;
+    public static final int TREE_DAMAGE = 1;
 
     public Tree() {
         this.sprite = new Sprite(GameAssetManager.getGameAssetManager().treeTex);
