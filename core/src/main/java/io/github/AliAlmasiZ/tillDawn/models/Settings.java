@@ -5,15 +5,12 @@ import com.badlogic.gdx.Preferences;
 import io.github.AliAlmasiZ.tillDawn.models.enums.HeroType;
 import io.github.AliAlmasiZ.tillDawn.models.enums.MusicTrack;
 import io.github.AliAlmasiZ.tillDawn.models.enums.WeaponType;
+import io.github.AliAlmasiZ.tillDawn.views.Text;
 
 public class Settings {
     private static Settings instance;
     private final String PREFS_NAME = "GameSettings";
     private final Preferences prefs = Gdx.app.getPreferences(PREFS_NAME);
-
-
-
-
 
     public float sfxVolume;
     public float musicVolume;
@@ -36,6 +33,7 @@ public class Settings {
         gameTime = Time.valueOf(prefs.getString(Fields.TIME.name(), Time.FIVE.name()));
         heroType = HeroType.valueOf(prefs.getString(Fields.HERO.name(), HeroType.SHANA.name()));
         weaponType = WeaponType.valueOf(prefs.getString(Fields.WEOPON.name(), WeaponType.REVOLVER.name()));
+        Text.isFirstActive = prefs.getBoolean(Fields.LANGUAGE.name(), true);
 
         savePrefs();
     }
@@ -49,6 +47,7 @@ public class Settings {
         prefs.putString(Fields.TIME.name(), gameTime.name());
         prefs.putString(Fields.HERO.name(), heroType.name());
         prefs.putString(Fields.WEOPON.name(), weaponType.name());
+        prefs.putBoolean(Fields.LANGUAGE.name(), Text.isFirstActive);
 
         prefs.flush();
     }
@@ -67,7 +66,8 @@ public class Settings {
         MUSIC_TRACK,
         TIME,
         HERO,
-        WEOPON
+        WEOPON,
+        LANGUAGE
         ;
     }
 

@@ -20,12 +20,25 @@ public class SettingMenuView implements Disposable {
     private final Table table;
     private final InputSettingsDialog inputDialog;
     public Slider sfxSlider, musicSlider;
-    public CheckBox autoReload, blackAndWhite;
+    public CheckBox autoReload, blackAndWhite, english;
     public SelectBox<MusicTrack> musicTrackSelection;
     public TextButton back;
 
 
+
+    Label sfxLabel;
+    Label musicLabel;
+    Label musicTrackLabel;
+    TextButton changeInputButtons;
+
     public SettingMenuView(Skin skin) {
+
+        sfxLabel = new Label(Text.SFX_VOLUME.getText() ,skin);
+        musicLabel = new Label(Text.MUSIC_VOLUME.getText(), skin);
+        musicTrackLabel = new Label(Text.MUSIC_TRACK.getText(), skin);
+        changeInputButtons = new TextButton(Text.CHANGE_INPUTS.getText(), skin);
+
+
         stage = new Stage(new ScreenViewport());
         Gdx.input.setInputProcessor(stage);
 
@@ -37,6 +50,7 @@ public class SettingMenuView implements Disposable {
 
         musicTrackSelection = new SelectBox<>(skin);
         musicTrackSelection.setItems(MusicTrack.values());
+        musicTrackSelection.setSelected(Settings.getInstance().musicTrack);
         musicTrackSelection.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
@@ -46,10 +60,7 @@ public class SettingMenuView implements Disposable {
             }
         });
 
-        Label sfxLabel = new Label(Text.SFX_VOLUME.getText() ,skin);
-        Label musicLabel = new Label(Text.MUSIC_VOLUME.getText(), skin);
-        Label musicTrackLabel = new Label(Text.MUSIC_TRACK.getText(), skin);
-        TextButton changeInputButtons = new TextButton(Text.CHANGE_INPUTS.getText(), skin);
+
 
 
 
@@ -57,6 +68,7 @@ public class SettingMenuView implements Disposable {
         musicSlider = new Slider(0, 100, 1, false, skin);
         autoReload = new CheckBox(Text.AUTO_RELOAD.getText(), skin);
         blackAndWhite = new CheckBox(Text.BLACK_AND_WHITE.getText(), skin);
+        english = new CheckBox("English", skin);
         back = new TextButton(Text.GO_BACK.getText(), skin);
         inputDialog = new InputSettingsDialog(skin);
 
@@ -66,6 +78,7 @@ public class SettingMenuView implements Disposable {
         musicSlider.setValue(100 * Settings.getInstance().musicVolume);
         autoReload.setChecked(Settings.getInstance().autoReload);
         blackAndWhite.setChecked(Settings.getInstance().blackWhite);
+        english.setChecked(Text.isFirstActive);
 
         sfxSlider.addListener(new ChangeListener() {
             @Override
@@ -96,6 +109,13 @@ public class SettingMenuView implements Disposable {
                 Settings.getInstance().savePrefs();
             }
         });
+        english.addListener(new ChangeListener() {
+            @Override
+            public void changed(ChangeEvent event, Actor actor) {
+                Text.isFirstActive = english.isChecked();
+                Settings.getInstance().savePrefs();
+            }
+        });
         changeInputButtons.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
@@ -108,15 +128,16 @@ public class SettingMenuView implements Disposable {
 
 
         table.add(sfxLabel).left().pad(10);
-        table.add(sfxSlider).right().growX().pad(10).row();
+        table.add(sfxSlider).colspan(2).right().growX().pad(10).row();
         table.add(musicLabel).left().pad(10);
-        table.add(musicSlider).right().growX().pad(10).row();
+        table.add(musicSlider).colspan(2).right().growX().pad(10).row();
         table.add(autoReload).center().pad(20);
+        table.add(english).center().pad(20);
         table.add(blackAndWhite).center().pad(20).row();
         table.add(musicTrackLabel).left().pad(20);
-        table.add(musicTrackSelection).row();
-        table.add(changeInputButtons).center().pad(30);
-        table.add(back).center().pad(30).row();
+        table.add(musicTrackSelection).colspan(2).row();
+        table.add(changeInputButtons).colspan(2).center().pad(30);
+        table.add(back).colspan(2).center().pad(30).row();
 
 
 
@@ -130,6 +151,14 @@ public class SettingMenuView implements Disposable {
     }
 
     public void render(float delta) {
+         sfxLabel.setText(Text.SFX_VOLUME.getText());
+         musicLabel.setText(Text.MUSIC_VOLUME.getText());
+         musicTrackLabel.setText(Text.MUSIC_TRACK.getText());
+         changeInputButtons.setText(Text.CHANGE_INPUTS.getText());
+         autoReload.setText(Text.AUTO_RELOAD.getText());
+         blackAndWhite.setText(Text.BLACK_AND_WHITE.getText());
+         back.setText(Text.GO_BACK.getText());
+
         stage.act(delta);
         stage.draw();
     }

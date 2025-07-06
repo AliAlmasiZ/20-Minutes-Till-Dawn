@@ -44,6 +44,12 @@ public enum Text {
     BLACK_AND_WHITE("black and white", "siah o sefid"),
     ENTER_KEY("enter a key", "yek klid vared konid"),
 
+    //PREGAME
+    START_GAME("Start Game", "shoroo bazi"),
+    HERO("Hero", "Ghahraman"),
+    DURATION("Game Duration", "modat bazi"),
+
+
     //PAUSE
     RESUME("resume", "edame"),
     SHOW_CHEATCODES("show cheatcodes", "namayesh cheatcode ha"),

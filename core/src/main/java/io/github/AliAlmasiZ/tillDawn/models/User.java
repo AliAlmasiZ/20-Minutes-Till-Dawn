@@ -22,6 +22,8 @@ public class User {
 //    private String securityQuestion;
     private String securityAnswer;
     private int score;
+    private int kill;
+    private float longestSurvivalTime = 0;
     private String avatarPath;
     @Transient
     private transient Player player;
@@ -39,6 +41,7 @@ public class User {
         this.securityAnswer = securityAnswer;
         this.id = ++playersCount;
         score = 0;
+        kill = 0;
         this.player = JsonSaver.getInstance().loadPlayer(this);
         this.player.setUserID(id);
         setRandomAvatar();
@@ -106,6 +109,22 @@ public class User {
 
     public void setScore(int score) {
         this.score = score;
+    }
+
+    public int getKill() {
+        return kill;
+    }
+
+    public void setKill(int kill) {
+        this.kill = kill;
+    }
+
+    public float getLongestSurvivalTime() {
+        return longestSurvivalTime;
+    }
+
+    public void setLongestSurvivalTime(float longestSurvivalTime) {
+        this.longestSurvivalTime = longestSurvivalTime;
     }
 
     public Player getPlayer() {

@@ -35,6 +35,7 @@ import io.github.AliAlmasiZ.tillDawn.models.Entities.XPOrb;
 import io.github.AliAlmasiZ.tillDawn.models.GameAssetManager;
 import io.github.AliAlmasiZ.tillDawn.models.Player;
 import io.github.AliAlmasiZ.tillDawn.models.Settings;
+import io.github.AliAlmasiZ.tillDawn.models.User;
 import io.github.AliAlmasiZ.tillDawn.models.enums.AbilityType;
 import io.github.AliAlmasiZ.tillDawn.models.enums.EnemyType;
 import io.github.AliAlmasiZ.tillDawn.models.enums.GameAction;
@@ -535,9 +536,8 @@ public class GameScreen extends ScreenAdapter {
                 spawnPlayerBullet();
                 player.lastShotTime = TimeUtils.millis();
                 if (!player.isReloading) player.currentAmmo--; // Decrement ammo if not reloading
-                if (player.currentAmmo == 0 && !player.isReloading) {
-                    // TODO: auto-reload
-                    // player.startReload();
+                if (player.currentAmmo == 0 && !player.isReloading && Settings.getInstance().autoReload) {
+                    player.startReload();
                 }
             }
         }
@@ -1031,6 +1031,11 @@ public class GameScreen extends ScreenAdapter {
         gameOverDialog.setOutcome(outcome);
         gameOverDialog.setScore(score);
         gameOverDialog.show(uiStage);
+
+        User user = AppData.getAppData().activeUser;
+        user.setKill(user.getKill() + kill);
+        user.setScore(user.getScore() + score);
+        user.setLongestSurvivalTime(Math.max(MAX_GAME_TIME - gameTimer , user.getLongestSurvivalTime()));
     }
 
 }

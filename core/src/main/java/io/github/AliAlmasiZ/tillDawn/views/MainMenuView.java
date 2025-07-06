@@ -71,6 +71,12 @@ public class MainMenuView {
     }
 
     public void render(float delta) {
+        loadGameBtn.setText(Text.CONTINUE_SAVED_GAME.getText());
+        settingsBtn.setText(Text.SETTINGS.getText());
+        profileBtn.setText(Text.PROFILE.getText());
+        pregameBtn.setText(Text.PRE_GAME.getText());
+        scoreboardBtn.setText(Text.SCOREBOARD.getText());
+        logoutBtn.setText(Text.LOGOUT.getText());
         stage.act(delta);
         stage.draw();
     }
