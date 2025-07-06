@@ -58,6 +58,9 @@ public enum Text {
     WEAPON("Weapon", "selah"),
     AMMO("Ammo", "kheshab"),
     AUTO_AIM("Auto-Aim", "aim khodkar"),
+    RELOADING("reloading", "dar hal reload"),
+    ON("ON", "roshan"),
+    OFF("OFF", "khamoosh"),
 
 
     ;

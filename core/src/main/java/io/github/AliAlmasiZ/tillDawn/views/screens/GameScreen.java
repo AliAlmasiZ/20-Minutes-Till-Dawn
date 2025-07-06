@@ -17,7 +17,9 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
+import com.badlogic.gdx.scenes.scene2d.ui.ProgressBar;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
@@ -111,7 +113,6 @@ public class GameScreen extends ScreenAdapter {
     private Label timeLabel;
     private Label healthLabel;
     private Label levelLabel;
-    private Label xpLabel;
     private Label weaponLabel;
     private Label ammoLabel;
     private Label pauseMessageLabel;
@@ -121,8 +122,11 @@ public class GameScreen extends ScreenAdapter {
     private Table messagesTable;
     private Label autoAimStatusLabel;
 
-
     private boolean autoAimEnabled = false;
+
+    private ProgressBar xpBar;
+    private Label xpLabel;
+    private Texture progressBarBgTex, progressBarKnobTex;
 
     private Pixmap cursorPixmap;
     private Cursor customCursor;
@@ -214,14 +218,33 @@ public class GameScreen extends ScreenAdapter {
         // --- UI STAGE SETUP ---
         uiStage = new Stage(new ScreenViewport(), batch);
         Gdx.input.setInputProcessor(uiStage);
-
         Label.LabelStyle labelStyle = new Label.LabelStyle(font, Color.WHITE);
+
+
+        Pixmap bgPixmap = new Pixmap(100, 15, Pixmap.Format.RGBA8888);
+        bgPixmap.setColor(Color.DARK_GRAY);
+        bgPixmap.fill();
+        progressBarBgTex = new Texture(bgPixmap);
+        bgPixmap.dispose();
+
+        Pixmap knobPixmap = new Pixmap(1 , 15, Pixmap.Format.RGBA8888);
+        knobPixmap.setColor(Color.CYAN);
+        knobPixmap.fill();
+        progressBarKnobTex = new Texture(knobPixmap);
+        knobPixmap.dispose();
+
+        ProgressBar.ProgressBarStyle progressBarStyle = new ProgressBar.ProgressBarStyle();
+        progressBarStyle.background = new TextureRegionDrawable(new TextureRegion(progressBarBgTex));
+        progressBarStyle.knobBefore = new TextureRegionDrawable(new TextureRegion(progressBarKnobTex));
+
+
 
         scoreLabel = new Label(Text.SCORE + ": 0", labelStyle);
         timeLabel = new Label(Text.TIME.getText() + ": 00:00", labelStyle);
         healthLabel = new Label(Text.HEALTH.getText() + ": 100/100", labelStyle);
         levelLabel = new Label(Text.LEVEL.getText() + ": 1", labelStyle);
-        xpLabel = new Label("XP: 0/100", labelStyle);
+        xpBar = new ProgressBar(0, 100, 1, false, progressBarStyle);
+        xpLabel = new Label("0/100", labelStyle);
         weaponLabel = new Label(Text.WEAPON + ": REVOLVER", labelStyle);
         ammoLabel = new Label(Text.AMMO + ": 6/6", labelStyle);
         autoAimStatusLabel = new Label(Text.AUTO_AIM + ": OFF", labelStyle);
@@ -243,7 +266,13 @@ public class GameScreen extends ScreenAdapter {
         statsTable.add(timeLabel).left().row();
         statsTable.add(healthLabel).left().row();
         statsTable.add(levelLabel).left().row();
-        statsTable.add(xpLabel).left().row();
+
+        Table xpTable = new Table();
+        xpTable.add(xpBar).width(150).height(15);
+        xpTable.add(xpLabel).padLeft(5);
+        statsTable.add(xpTable).left().row();
+
+
         statsTable.add(weaponLabel).left().padTop(5).row();
         statsTable.add(ammoLabel).left().row();
         statsTable.add(autoAimStatusLabel).left().padTop(5).row();
@@ -759,15 +788,19 @@ public class GameScreen extends ScreenAdapter {
     private void updateUILabels() {
         if (player == null || scoreLabel == null) return; // Ensure UI elements are initialized
 
-        scoreLabel.setText("Score: " + score);
-        timeLabel.setText(String.format("Remaining Time: %02d:%02d", (int)((MAX_GAME_TIME - gameTimer) / 60), (int)((MAX_GAME_TIME - gameTimer) % 60)));
-        healthLabel.setText("Health: " + player.health + "/" + player.maxHealth);
-        levelLabel.setText("Level: " + player.level);
-        xpLabel.setText("XP: " + player.xp + "/" + player.xpToNextLevel);
-        weaponLabel.setText("Weapon: " + player.currentWeapon.name());
-        String ammoText = player.isReloading ? "Reloading..." : player.currentAmmo + "/" + player.currentMaxAmmo;
-        ammoLabel.setText("Ammo: " + ammoText);
-        autoAimStatusLabel.setText("Auto-Aim: " + (autoAimEnabled ? "ON" : "OFF"));
+        scoreLabel.setText(Text.SCORE + ": " + score);
+        timeLabel.setText(String.format(Text.TIME + ": %02d:%02d", (int)((MAX_GAME_TIME - gameTimer) / 60), (int)((MAX_GAME_TIME - gameTimer) % 60)));
+        healthLabel.setText(Text.HEALTH.getText() + ": " + player.health + "/" + player.maxHealth);
+        levelLabel.setText(Text.LEVEL + ": " + player.level);
+
+        xpBar.setRange(0, player.xpToNextLevel);
+        xpBar.setValue(player.xp);
+        xpLabel.setText(player.xp + "/" + player.xpToNextLevel);
+
+        weaponLabel.setText(Text.WEAPON + ": " + player.currentWeapon.name());
+        String ammoText = player.isReloading ? Text.RELOADING + "..." : player.currentAmmo + "/" + player.currentMaxAmmo;
+        ammoLabel.setText(Text.AMMO + ": " + ammoText);
+        autoAimStatusLabel.setText(Text.AUTO_AIM + ": " + (autoAimEnabled ? Text.ON : Text.OFF));
 
 
         if (isPaused && !gameOver) {
@@ -877,7 +910,7 @@ public class GameScreen extends ScreenAdapter {
         // Render UI
         updateUILabels();
         uiStage.getViewport().apply();
-        uiStage.act(Math.min(Gdx.graphics.getDeltaTime(), 1 / 30f));
+        uiStage.act(delta);
         uiStage.draw();
     }
 
@@ -901,6 +934,8 @@ public class GameScreen extends ScreenAdapter {
             customCursor.dispose(); // Dispose the custom cursor object
             customCursor = null;
         }
+        if(progressBarKnobTex != null) progressBarKnobTex.dispose();
+        if (progressBarBgTex != null) progressBarBgTex.dispose();
         if(lightingOverlayTexture != null) lightingOverlayTexture.dispose();
         if(font != null) font.dispose();
         if(shapeRenderer != null) shapeRenderer.dispose();
