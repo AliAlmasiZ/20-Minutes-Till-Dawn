@@ -24,10 +24,10 @@ import java.io.Serializable;
 public class Player implements Serializable {
     private int UserID;
     public Vector2 position;
-    public float baseSpeed = 200f;
+    public float baseSpeed = Settings.getInstance().heroType.speed * 50f;
     public float speed;
     public int health ;
-    public int maxHealth = 100;
+    public int maxHealth = Settings.getInstance().heroType.hp;
 //    public int damage = 10;
 
     @Transient
@@ -197,8 +197,8 @@ public class Player implements Serializable {
         Gdx.app.log("Player", "Applying ability: " + ability.name());
         switch (ability) {
             case VITALITY:
-                this.maxHealth += 25;
-                this.health = Math.min(this.health + 25, this.maxHealth);
+                this.maxHealth += 1;
+                this.health = Math.min(this.health + 1, this.maxHealth);
                 permanentAbilities.add(ability);
                 Gdx.app.log("Player", "VITALITY applied. Max HP: " + maxHealth);
                 break;
@@ -332,5 +332,20 @@ public class Player implements Serializable {
 
     public void setUserID(int userID) {
         UserID = userID;
+    }
+
+    public void setMaxHealth(int maxHealth) {
+
+    }
+    public void setMaxHealth() {
+        setMaxHealth(Settings.getInstance().heroType.hp);
+    }
+
+    public void setBaseSpeed(float baseSpeed) {
+        this.baseSpeed = baseSpeed * 50f;
+    }
+
+    public void setBaseSpeed() {
+        setBaseSpeed(Settings.getInstance().heroType.speed);
     }
 }

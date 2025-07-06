@@ -35,6 +35,8 @@ public class Settings {
         musicTrack = MusicTrack.valueOf(prefs.getString(Fields.MUSIC_TRACK.name(), MusicTrack.StrangerThings.name()));
         gameTime = Time.valueOf(prefs.getString(Fields.TIME.name(), Time.FIVE.name()));
         heroType = HeroType.valueOf(prefs.getString(Fields.HERO.name(), HeroType.SHANA.name()));
+        weaponType = WeaponType.valueOf(prefs.getString(Fields.WEOPON.name(), WeaponType.REVOLVER.name()));
+
         savePrefs();
     }
 
@@ -46,6 +48,7 @@ public class Settings {
         prefs.putString(Fields.MUSIC_TRACK.name(), musicTrack.name());
         prefs.putString(Fields.TIME.name(), gameTime.name());
         prefs.putString(Fields.HERO.name(), heroType.name());
+        prefs.putString(Fields.WEOPON.name(), weaponType.name());
 
         prefs.flush();
     }
@@ -63,7 +66,8 @@ public class Settings {
         BLACK_N_WHITE,
         MUSIC_TRACK,
         TIME,
-        HERO
+        HERO,
+        WEOPON
         ;
     }
 

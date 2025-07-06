@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.utils.Array;
 import io.github.AliAlmasiZ.tillDawn.models.DataBase.AppData;
 import io.github.AliAlmasiZ.tillDawn.models.DataBase.JsonSaver;
+import io.github.AliAlmasiZ.tillDawn.views.screens.GameScreen;
 
 import javax.persistence.*;
 
@@ -24,6 +25,8 @@ public class User {
     private String avatarPath;
     @Transient
     private transient Player player;
+    @Transient
+    private transient GameScreen lastGame;
 
 
     private User(){}
@@ -126,5 +129,13 @@ public class User {
 
     public void delete() {
 
+    }
+
+    public GameScreen getLastGame() {
+        return lastGame;
+    }
+
+    public void setLastGame(GameScreen lastGame) {
+        this.lastGame = lastGame;
     }
 }

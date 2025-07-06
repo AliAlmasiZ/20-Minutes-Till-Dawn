@@ -49,7 +49,8 @@ public enum Text {
     SHOW_CHEATCODES("show cheatcodes", "namayesh cheatcode ha"),
     SHOW_ABILITIES("show abilities", "namayesh tavanaei ha"),
     GIVE_UP("giveUp", "taslim"),
-    SAVE_AND_EXIT("Save and Exit", "exit"),
+    SAVE_AND_EXIT("Save and Exit", "zakhire"),
+    EXIT("Exit", "khorooj"),
 
 
     //GAME
@@ -62,6 +63,11 @@ public enum Text {
     RELOADING("reloading", "dar hal reload"),
     ON("ON", "roshan"),
     OFF("OFF", "khamoosh"),
+    GAME_OVER("GAME OVER", "bazi tamam shod"),
+    YOU_SURVIVED("YOU SURVIVED!", "ma zendeh moondim!"),
+    SURVIVAL_TIME("survival time", "zaman zende mandan"),
+    KILL_COUNT("kill count", "koshte ha"),
+
 
 
     ;

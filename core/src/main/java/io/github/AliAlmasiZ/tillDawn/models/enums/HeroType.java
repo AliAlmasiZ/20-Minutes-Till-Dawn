@@ -10,8 +10,8 @@ public enum HeroType {
 
 
 
-    int hp;
-    int speed;
+    public int hp;
+    public int speed;
 
     HeroType(int hp, int speed) {
         this.hp = hp;

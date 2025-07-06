@@ -42,6 +42,7 @@ import io.github.AliAlmasiZ.tillDawn.models.enums.WeaponType;
 import io.github.AliAlmasiZ.tillDawn.views.DeathAnimation;
 import io.github.AliAlmasiZ.tillDawn.views.HitAnimation;
 import io.github.AliAlmasiZ.tillDawn.views.Text;
+import io.github.AliAlmasiZ.tillDawn.views.dialogs.GameOverDialog;
 import io.github.AliAlmasiZ.tillDawn.views.dialogs.PauseDialog;
 
 import java.util.HashSet;
@@ -100,7 +101,7 @@ public class GameScreen extends ScreenAdapter {
 
     public boolean isPaused = false;
     private boolean gameOver = false;
-    private int score = 0;
+    private int score = 0, kill = 0;
     private float gameTimer = 0;
     private final float MAX_GAME_TIME = Settings.getInstance().gameTime.minutes * 60;
 
@@ -114,19 +115,16 @@ public class GameScreen extends ScreenAdapter {
     private Stage uiStage;
     private Table uiTableRoot;
     private Label scoreLabel;
+    private Label killLabel;
     private Label timeLabel;
     private Label healthLabel;
     private Label levelLabel;
     private Label weaponLabel;
     private Label ammoLabel;
-    private Label pauseMessageLabel;
 
     private PauseDialog pauseDialog;
+    private GameOverDialog gameOverDialog;
 
-    private Label gameOverMessageLabel;
-    private Label finalScoreLabel;
-    private Label restartMessageLabel;
-    private Table messagesTable;
     private Label autoAimStatusLabel;
 
     private boolean autoAimEnabled = false;
@@ -151,6 +149,24 @@ public class GameScreen extends ScreenAdapter {
     public GameScreen(Main main) {
         this.main = main;
         batch = main.batch;
+
+        trees = new Array<>();
+        enemies = new Array<>();
+        playerBullets = new Array<>();
+        enemyBullets = new Array<>();
+        xpOrbs = new Array<>();
+        deathAnimations = new Array<>();
+        hitAnimations = new Array<>();
+        shapeRenderer = new ShapeRenderer();
+
+        populatedTreeCells = new HashSet<>();
+
+        player = AppData.getAppData().activeUser.getPlayer();
+        player.setMaxHealth();
+        player.setBaseSpeed();
+        player.equipWeapon(Settings.getInstance().weaponType);
+
+
     }
 
     @Override
@@ -180,7 +196,7 @@ public class GameScreen extends ScreenAdapter {
 //        enemyTexture = new Texture(GameAssetManager.getGameAssetManager().getCharacter1Idle0())
 
 
-        player = AppData.getAppData().activeUser.getPlayer();
+
 
         if (player != null) {
             float pWidth = player.getWidth();
@@ -191,30 +207,13 @@ public class GameScreen extends ScreenAdapter {
             );
             player.update(0);
         }
-        trees = new Array<>();
-        enemies = new Array<>();
-        playerBullets = new Array<>();
-        enemyBullets = new Array<>();
-        xpOrbs = new Array<>();
-        deathAnimations = new Array<>();
-        hitAnimations = new Array<>();
-        shapeRenderer = new ShapeRenderer();
 
-        populatedTreeCells = new HashSet<>();
         spawnTreesAroundPlayer();
 
 
         FreeTypeFontGenerator generator = null;
         try {
-
-//            generator = new FreeTypeFontGenerator(Gdx.files.internal("Fonts/Font/ChevyRay - Express.ttf"));
-//            FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-//            parameter.size = 24;
-//            parameter.color = Color.WHITE;
-//            font = generator.generateFont(parameter);
             font = new BitmapFont(Gdx.files.internal(GameAssetManager.getGameAssetManager().CHEVY_RAY_EXPRESS));
-//            font = new BitmapFont(Gdx.files.internal("Fonts/Font/ChevyRay - Express.ttf"));
-//            font.setColor(Color.WHITE);
 
         } catch (Exception e) {
             Gdx.app.error("GameScreen", "Could not load bitmap font 'fonts/yourfont.fnt'. Make sure the .fnt and .png files are in assets/fonts/", e);
@@ -250,6 +249,7 @@ public class GameScreen extends ScreenAdapter {
 
 
         scoreLabel = new Label(Text.SCORE + ": 0", labelStyle);
+        killLabel = new Label(Text.KILL_COUNT + ": 0", labelStyle);
         timeLabel = new Label(Text.TIME.getText() + ": 00:00", labelStyle);
         healthLabel = new Label(Text.HEALTH.getText() + ": 100/100", labelStyle);
         levelLabel = new Label(Text.LEVEL.getText() + ": 1", labelStyle);
@@ -262,20 +262,19 @@ public class GameScreen extends ScreenAdapter {
 
 
         pauseDialog = new PauseDialog(this);
+        gameOverDialog = new GameOverDialog(this);
 
-        //TODO: make dialog
-        pauseMessageLabel = new Label("PAUSED (Press " + ControlsManager.getKeyNameForAction(GameAction.PAUSE) + " or ESC to resume)", labelStyle);
-        gameOverMessageLabel = new Label("GAME OVER", labelStyle);
-        finalScoreLabel = new Label("Final Score: 0", labelStyle);
-        restartMessageLabel = new Label("Press R to Restart", labelStyle);
+
 
         uiTableRoot = new Table();
         uiTableRoot.setFillParent(true);
+        uiTableRoot.top();
         uiStage.addActor(uiTableRoot);
 
         Table statsTable = new Table();
         statsTable.top().left().pad(10);
         statsTable.add(scoreLabel).left().row();
+        statsTable.add(killLabel).left().row();
         statsTable.add(timeLabel).left().row();
         statsTable.add(healthLabel).left().row();
         statsTable.add(levelLabel).left().row();
@@ -291,17 +290,9 @@ public class GameScreen extends ScreenAdapter {
         statsTable.add(autoAimStatusLabel).left().padTop(5).row();
 
 
-        messagesTable = new Table();
-        messagesTable.center();
-        messagesTable.add(pauseMessageLabel).center().row();
-        messagesTable.add(gameOverMessageLabel).center().padTop(10).row();
-        messagesTable.add(finalScoreLabel).center().padTop(5).row();
-        messagesTable.add(restartMessageLabel).center().padTop(5).row();
-        messagesTable.setVisible(false);
 
         uiTableRoot.add(statsTable).expandX().top().left(); // Stats table at top-left
         uiTableRoot.row(); // New row
-        uiTableRoot.add(messagesTable).expand().fill().center(); // Messages table takes remaining space, centered
 
 
         try {
@@ -687,7 +678,7 @@ public class GameScreen extends ScreenAdapter {
 
         gameTimer += delta;
         if(gameTimer > MAX_GAME_TIME) {
-            gameOver = true;
+            setGameOver();
             return;
         }
 
@@ -774,6 +765,7 @@ public class GameScreen extends ScreenAdapter {
                             enemy.position.y + enemy.getHeight()/2f);
                         enemies.removeIndex(j);
                         score += 10;
+                        kill += 1;
                         spawnXPOrb(enemyCenterPos);
 
                         Animation<TextureRegion> deathAnim = GameAssetManager.getGameAssetManager().deathAnimation;
@@ -806,7 +798,7 @@ public class GameScreen extends ScreenAdapter {
                         );
                     }
 
-                    if (player.health <= 0) { gameOver = true; return; }
+                    if (player.health <= 0) { setGameOver(); return; }
                 }
             }
         }
@@ -817,7 +809,7 @@ public class GameScreen extends ScreenAdapter {
                 if(TimeUtils.millis() - player.lastHitTime > player.invincibilityDuration) {
                     player.takeDamage(enemy.damage);
                     if(player.health <= 0) {
-                        gameOver = true;
+                        setGameOver();
                         return;
                     }
                 }
@@ -829,7 +821,7 @@ public class GameScreen extends ScreenAdapter {
                 if(TimeUtils.millis() - player.lastHitTime > player.invincibilityDuration) {
                     player.takeDamage(Tree.TREE_DAMAGE);
                     if(player.health <= 0) {
-                        gameOver = true;
+                        setGameOver();
                         return;
                     }
                 }
@@ -852,9 +844,10 @@ public class GameScreen extends ScreenAdapter {
 
 
     private void updateUILabels() {
-        if (player == null || scoreLabel == null) return; // Ensure UI elements are initialized
+        if (player == null ) return;
 
         scoreLabel.setText(Text.SCORE + ": " + score);
+        killLabel.setText(Text.KILL_COUNT + ": " + kill);
         timeLabel.setText(String.format(Text.TIME + ": %02d:%02d", (int)((MAX_GAME_TIME - gameTimer) / 60), (int)((MAX_GAME_TIME - gameTimer) % 60)));
         healthLabel.setText(Text.HEALTH.getText() + ": " + player.health + "/" + player.maxHealth);
         levelLabel.setText(Text.LEVEL + ": " + player.level);
@@ -873,22 +866,15 @@ public class GameScreen extends ScreenAdapter {
 
         if (isPaused && !gameOver) {
 
-//            messagesTable.setVisible(true);
-//            pauseMessageLabel.setVisible(true);
-//            gameOverMessageLabel.setVisible(false);
-//            finalScoreLabel.setVisible(false);
-//            restartMessageLabel.setVisible(false);
         } else if (gameOver) {
-            messagesTable.setVisible(true);
-            pauseMessageLabel.setVisible(false);
-            String outcome = (gameTimer >= MAX_GAME_TIME) ? "YOU SURVIVED!" : "GAME OVER";
-            gameOverMessageLabel.setText(outcome);
-            gameOverMessageLabel.setVisible(true);
-            finalScoreLabel.setText("Final Score: " + score);
-            finalScoreLabel.setVisible(true);
-            restartMessageLabel.setVisible(true);
+//            String outcome = (gameTimer >= MAX_GAME_TIME) ? Text.SURVIVAL_TIME.getText() : Text.GAME_OVER.getText();
+//            gameOverDialog.setKill(kill);
+//            gameOverDialog.setSurvivalTime(gameTimer / 60 + ":" + gameTimer % 60);
+//            gameOverDialog.setOutcome(outcome);
+//            gameOverDialog.setScore(score);
+//            gameOverDialog.show(uiStage);
         } else {
-            messagesTable.setVisible(false);
+            gameOverDialog.hide();
         }
     }
 
@@ -1019,10 +1005,12 @@ public class GameScreen extends ScreenAdapter {
         xpOrbs.clear();
         deathAnimations.clear();
         hitAnimations.clear();
+        AppData.getAppData().activeUser.setLastGame(null);
     }
 
     @Override
     public void hide() {
+        AppData.getAppData().activeUser.setLastGame(this);
         if(isPaused) {
             pauseDialog.hide();
         }
@@ -1033,6 +1021,16 @@ public class GameScreen extends ScreenAdapter {
             customCursor = null;
         }
         Gdx.input.setInputProcessor(null);
+    }
+
+    public void setGameOver() {
+        gameOver = true;
+        String outcome = (gameTimer >= MAX_GAME_TIME) ? Text.SURVIVAL_TIME.getText() : Text.GAME_OVER.getText();
+        gameOverDialog.setKill(kill);
+        gameOverDialog.setSurvivalTime(String.format("%02d:%02d", (int) gameTimer / 60, (int) gameTimer % 60));
+        gameOverDialog.setOutcome(outcome);
+        gameOverDialog.setScore(score);
+        gameOverDialog.show(uiStage);
     }
 
 }

@@ -5,9 +5,11 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import io.github.AliAlmasiZ.tillDawn.Main;
 import io.github.AliAlmasiZ.tillDawn.controllers.PauseMenuController;
+import io.github.AliAlmasiZ.tillDawn.models.DataBase.AppData;
 import io.github.AliAlmasiZ.tillDawn.models.GameAssetManager;
 import io.github.AliAlmasiZ.tillDawn.views.Text;
 import io.github.AliAlmasiZ.tillDawn.views.screens.GameScreen;
+import io.github.AliAlmasiZ.tillDawn.views.screens.MainMenuScreen;
 import io.github.AliAlmasiZ.tillDawn.views.screens.SettingMenuScreen;
 
 public class PauseDialog extends Dialog {
@@ -64,13 +66,17 @@ public class PauseDialog extends Dialog {
         giveUp.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-
+                hide();
+                screen.setGameOver();
             }
         });
         save.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-
+                AppData.getAppData().activeUser.setLastGame(screen);
+                screen.hide();
+                Main.getInstance().setScreen(new MainMenuScreen(Main.getInstance()));
+                hide();
             }
         });
 

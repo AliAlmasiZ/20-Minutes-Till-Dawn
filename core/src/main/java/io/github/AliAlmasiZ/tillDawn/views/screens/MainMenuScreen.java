@@ -63,7 +63,9 @@ public class MainMenuScreen implements Screen {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 //TODO: for save should store gamedata
-                main.setScreen(new GameScreen(main));
+                if(AppData.getAppData().activeUser.getLastGame() == null)
+                    AppData.getAppData().activeUser.setLastGame(new GameScreen(main));
+                main.setScreen(AppData.getAppData().activeUser.getLastGame());
                 dispose();
             }
         });
