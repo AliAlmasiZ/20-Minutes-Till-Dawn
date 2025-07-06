@@ -42,6 +42,7 @@ public class SettingMenuView implements Disposable {
             public void changed(ChangeEvent event, Actor actor) {
                 Settings.getInstance().musicTrack = musicTrackSelection.getSelected();
                 Settings.getInstance().savePrefs();
+                Main.getInstance().playMusic();
             }
         });
 
@@ -49,12 +50,7 @@ public class SettingMenuView implements Disposable {
         Label musicLabel = new Label(Text.MUSIC_VOLUME.getText(), skin);
         Label musicTrackLabel = new Label(Text.MUSIC_TRACK.getText(), skin);
         TextButton changeInputButtons = new TextButton(Text.CHANGE_INPUTS.getText(), skin);
-        changeInputButtons.addListener(new ClickListener() {
-            @Override
-            public void clicked(InputEvent event, float x, float y) {
 
-            }
-        });
 
 
         sfxSlider = new Slider(0, 100, 1, false, skin);
@@ -81,6 +77,7 @@ public class SettingMenuView implements Disposable {
         musicSlider.addListener(new ChangeListener() {
             @Override
             public void changed(ChangeEvent event, Actor actor) {
+                Main.getInstance().playMusic();
                 Settings.getInstance().musicVolume = musicSlider.getValue() / 100;
                 Settings.getInstance().savePrefs();
             }
@@ -109,6 +106,7 @@ public class SettingMenuView implements Disposable {
 
 
 
+
         table.add(sfxLabel).left().pad(10);
         table.add(sfxSlider).right().growX().pad(10).row();
         table.add(musicLabel).left().pad(10);
@@ -116,7 +114,7 @@ public class SettingMenuView implements Disposable {
         table.add(autoReload).center().pad(20);
         table.add(blackAndWhite).center().pad(20).row();
         table.add(musicTrackLabel).left().pad(20);
-        table.row();//TODO
+        table.add(musicTrackSelection).row();
         table.add(changeInputButtons).center().pad(30);
         table.add(back).center().pad(30).row();
 

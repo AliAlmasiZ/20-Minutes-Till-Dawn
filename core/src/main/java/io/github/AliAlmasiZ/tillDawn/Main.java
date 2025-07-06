@@ -22,6 +22,7 @@ import io.github.AliAlmasiZ.tillDawn.models.DataBase.AppData;
 import io.github.AliAlmasiZ.tillDawn.models.GameAssetManager;
 import io.github.AliAlmasiZ.tillDawn.models.Settings;
 import io.github.AliAlmasiZ.tillDawn.models.User;
+import io.github.AliAlmasiZ.tillDawn.models.enums.MusicTrack;
 import io.github.AliAlmasiZ.tillDawn.views.MainMenuView;
 import io.github.AliAlmasiZ.tillDawn.views.screens.GameScreen;
 import io.github.AliAlmasiZ.tillDawn.views.screens.MainMenuScreen;
@@ -36,9 +37,11 @@ public class Main extends Game {
     private FrameBuffer frameBuffer;
 
     public SpriteBatch batch;
+    private static Music music;
 
     @Override
     public void create() {
+        playMusic();
         //TODO: for debug uncomment bellow code block :
         /*{
             AppData.getAppData().setActiveUser(new User("Ali", "pass", "meow"));
@@ -63,7 +66,6 @@ public class Main extends Game {
 
     @Override
     public void render() {
-        playMusic();
         frameBuffer.begin();
         Gdx.gl.glClearColor(0.1f, 0.1f, 0.15f, 1);
         Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
@@ -95,10 +97,18 @@ public class Main extends Game {
     }
 
     public void playMusic() {
-        Music music = Gdx.audio.newMusic(Gdx.files.internal(Settings.getInstance().musicTrack.getPath()));
-        if(!music.isPlaying())
-            music.play();
+        float pos = 0;
+        if(music != null && music.isPlaying()) {
+            pos = music.getPosition();
+            music.stop();
+            music.dispose();
+        }
+        music = Gdx.audio.newMusic(Gdx.files.internal(Settings.getInstance().musicTrack.getPath()));
         music.setVolume(Settings.getInstance().musicVolume);
+        music.setPosition(pos);
+        music.play();
+
+
     }
 
 }

@@ -51,6 +51,15 @@ public enum Text {
     EXIT("exit/giveUp", "khorooj"),
 
 
+    //GAME
+    TIME("Time", "Zaman"),
+    HEALTH("Health", "salamat"),
+    LEVEL("Level", "sath"),
+    WEAPON("Weapon", "selah"),
+    AMMO("Ammo", "kheshab"),
+    AUTO_AIM("Auto-Aim", "aim khodkar"),
+
+
     ;
 
     public static boolean isFirstActive = true;

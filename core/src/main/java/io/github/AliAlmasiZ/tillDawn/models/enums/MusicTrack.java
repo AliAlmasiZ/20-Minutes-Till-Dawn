@@ -1,8 +1,8 @@
 package io.github.AliAlmasiZ.tillDawn.models.enums;
 
 public enum MusicTrack {
-    YOU_GO("You Go, Girl", "musics/04. You Go, Girl.mp3"),
-    O_DEATH("'O Death' Theme", "musics/14. 'O Death' Theme.mp3")
+    StrangerThings("audio/musics/stranger-things-124008.mp3", "Stranger Things"),
+    A_HERO_OF_80S("audio/musics/a-hero-of-the-80s-126684.mp3", "A hero of 80s")
     ;
 
     String path;
@@ -17,7 +17,5 @@ public enum MusicTrack {
         return path;
     }
 
-    public String getName() {
-        return name;
-    }
+
 }

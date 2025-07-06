@@ -24,6 +24,7 @@ import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import io.github.AliAlmasiZ.tillDawn.Main;
 import io.github.AliAlmasiZ.tillDawn.controllers.utils.ControlsManager;
+import io.github.AliAlmasiZ.tillDawn.models.DataBase.AppData;
 import io.github.AliAlmasiZ.tillDawn.models.DataBase.GameData;
 import io.github.AliAlmasiZ.tillDawn.models.Entities.Bullet;
 import io.github.AliAlmasiZ.tillDawn.models.Entities.Enemy;
@@ -35,6 +36,8 @@ import io.github.AliAlmasiZ.tillDawn.models.enums.AbilityType;
 import io.github.AliAlmasiZ.tillDawn.models.enums.EnemyType;
 import io.github.AliAlmasiZ.tillDawn.models.enums.GameAction;
 import io.github.AliAlmasiZ.tillDawn.models.enums.WeaponType;
+import io.github.AliAlmasiZ.tillDawn.views.DeathAnimation;
+import io.github.AliAlmasiZ.tillDawn.views.Text;
 
 import java.util.HashSet;
 
@@ -59,12 +62,14 @@ public class GameScreen extends ScreenAdapter {
     private Texture enemyBulletTexture;
     private Texture xpOrbTexture;
     private Texture backgroundTexture;
+    private Texture lightingOverlayTexture;
 
     Array<Tree> trees;
     private Array<Enemy> enemies;
     private Array<Bullet> playerBullets;
     private Array<Bullet> enemyBullets;
     private Array<XPOrb> xpOrbs;
+    private Array<DeathAnimation> deathAnimations;
 
     private HashSet<Long> populatedTreeCells;
     private static final int TREE_CELL_SIZE = 1600;
@@ -157,12 +162,12 @@ public class GameScreen extends ScreenAdapter {
         enemyBulletTexture = GameAssetManager.getGameAssetManager().bulletTex;
         xpOrbTexture = GameAssetManager.getGameAssetManager().xpOrbTex;
         backgroundTexture = GameAssetManager.getGameAssetManager().backgroundTileTex;
+        lightingOverlayTexture = createLightingOverlay();
 
 //        enemyTexture = new Texture(GameAssetManager.getGameAssetManager().getCharacter1Idle0())
 
-        //TODO : Temp for test
-        player = new Player();
-//        player = AppData.getAppData().activeUser.getPlayer();
+
+        player = AppData.getAppData().activeUser.getPlayer();
 
         if (player != null) {
             float pWidth = player.getWidth();
@@ -178,6 +183,7 @@ public class GameScreen extends ScreenAdapter {
         playerBullets = new Array<>();
         enemyBullets = new Array<>();
         xpOrbs = new Array<>();
+        deathAnimations = new Array<>();
         shapeRenderer = new ShapeRenderer();
 
         populatedTreeCells = new HashSet<>();
@@ -211,15 +217,17 @@ public class GameScreen extends ScreenAdapter {
 
         Label.LabelStyle labelStyle = new Label.LabelStyle(font, Color.WHITE);
 
-        scoreLabel = new Label("Score: 0", labelStyle);
-        timeLabel = new Label("Time: 00:00", labelStyle);
-        healthLabel = new Label("Health: 100/100", labelStyle);
-        levelLabel = new Label("Level: 1", labelStyle);
+        scoreLabel = new Label(Text.SCORE + ": 0", labelStyle);
+        timeLabel = new Label(Text.TIME.getText() + ": 00:00", labelStyle);
+        healthLabel = new Label(Text.HEALTH.getText() + ": 100/100", labelStyle);
+        levelLabel = new Label(Text.LEVEL.getText() + ": 1", labelStyle);
         xpLabel = new Label("XP: 0/100", labelStyle);
-        weaponLabel = new Label("Weapon: REVOLVER", labelStyle);
-        ammoLabel = new Label("Ammo: 6/6", labelStyle);
-        autoAimStatusLabel = new Label("Auto-Aim: OFF", labelStyle);
+        weaponLabel = new Label(Text.WEAPON + ": REVOLVER", labelStyle);
+        ammoLabel = new Label(Text.AMMO + ": 6/6", labelStyle);
+        autoAimStatusLabel = new Label(Text.AUTO_AIM + ": OFF", labelStyle);
 
+
+        //TODO: make dialog
         pauseMessageLabel = new Label("PAUSED (Press " + ControlsManager.getKeyNameForAction(GameAction.PAUSE) + " or ESC to resume)", labelStyle);
         gameOverMessageLabel = new Label("GAME OVER", labelStyle);
         finalScoreLabel = new Label("Final Score: 0", labelStyle);
@@ -266,7 +274,7 @@ public class GameScreen extends ScreenAdapter {
                 Gdx.app.error("GameScreen", "Cursor pixmap is empty or could not be loaded.");
             }
         } catch (Exception e) {
-            Gdx.app.error("GameScreen", "Could not load custom cursor: cursors/custom_cursor.png", e);
+            Gdx.app.error("GameScreen", "Could not load custom cursor: ", e);
         }
 
         if (cursorPixmap != null) {
@@ -279,6 +287,64 @@ public class GameScreen extends ScreenAdapter {
         canSpawnEyebats = false;
         elderBossHasSpawned = false;
     }
+
+
+    private Texture createLightingOverlay() {
+        int screenWidth = Gdx.graphics.getWidth();
+        int screenHeight = Gdx.graphics.getHeight();
+        float MAX_DARKNESS = 0.5f;
+        int size = (int) (screenHeight * 0.9);
+//        int size = 512; // Size of the texture (power of 2 is good)
+        float radius = size / 2.5f; // Radius of the bright circle
+        float feather = size / 2f - radius; // Width of the soft edge
+
+        Pixmap pixmap = new Pixmap(screenWidth, screenHeight, Pixmap.Format.RGBA8888);
+        pixmap.setBlending(Pixmap.Blending.None); // Important for drawing with alpha
+
+        for (int y = 0; y < screenHeight; y++) {
+            for (int x = 0; x < screenWidth; x++) {
+                float distance = Vector2.dst(x, y, screenWidth / 2f, screenHeight / 2f);
+                if (distance < radius) {
+                    // Inside the main light circle: fully transparent
+                    pixmap.setColor(0, 0, 0, 0);
+                } else if (distance < radius + feather) {
+                    // In the soft edge (feather) area: fade to dark
+                    float alpha = (distance - radius) / feather;
+                    pixmap.setColor(0, 0, 0, alpha * MAX_DARKNESS); // 0.85f controls max darkness
+                } else {
+                    // Outside the light circle: dark
+                    pixmap.setColor(0, 0, 0, MAX_DARKNESS);
+                }
+                pixmap.drawPixel(x, y);
+            }
+        }
+
+        Texture overlayTexture = new Texture(pixmap);
+        pixmap.dispose(); // Dispose pixmap after creating texture
+        return overlayTexture;
+    }/*
+    private Texture createLightingOverlay() {
+        int screenWidth = Gdx.graphics.getWidth();
+        int screenHeight = Gdx.graphics.getHeight();
+
+        Pixmap pixmap = new Pixmap(screenWidth, screenHeight, Pixmap.Format.RGBA8888);
+
+        pixmap.setColor(0f,0f,0f,0.8f);
+        pixmap.fill();
+
+        int radius = 256;
+        pixmap.setColor(0f,0f,0f,0f);
+        pixmap.fillCircle(screenWidth / 2, screenHeight / 2, radius);
+
+        Texture texture = new Texture(pixmap);
+        pixmap.dispose();
+        return texture;
+
+
+
+
+    }*/
+
 
     private void spawnTreesAroundPlayer() {
         if (player == null || treeTexture == null) return;
@@ -784,12 +850,29 @@ public class GameScreen extends ScreenAdapter {
         if(player != null) player.draw(batch);
         for(Bullet bullet : playerBullets) bullet.draw(batch);
         for (Bullet bullet : enemyBullets) bullet.draw(batch);
+        for (DeathAnimation deathAnimation : deathAnimations) deathAnimation.draw(batch);
         batch.end();
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Filled);
         if (player != null) player.drawHealthBar(shapeRenderer);
         for (Enemy enemy : enemies) enemy.drawHealthBar(shapeRenderer);
         shapeRenderer.end();
+
+        // lightingOverlay
+
+        batch.setProjectionMatrix(uiStage.getCamera().combined);
+        batch.begin();
+        if (lightingOverlayTexture != null) {
+            batch.setColor(Color.WHITE);
+
+            float screenWidth = Gdx.graphics.getWidth();
+            float screenHeight = Gdx.graphics.getHeight();
+
+
+
+            batch.draw(lightingOverlayTexture, 0, 0, screenWidth, screenHeight);
+        }
+        batch.end();
 
         // Render UI
         updateUILabels();
@@ -818,10 +901,18 @@ public class GameScreen extends ScreenAdapter {
             customCursor.dispose(); // Dispose the custom cursor object
             customCursor = null;
         }
+        if(lightingOverlayTexture != null) lightingOverlayTexture.dispose();
+        if(font != null) font.dispose();
+        if(shapeRenderer != null) shapeRenderer.dispose();
+        if(uiStage != null) uiStage.dispose();
+        if(treeTexture != null) treeTexture.dispose();
 
+        trees.clear();
         enemies.clear();
         playerBullets.clear();
+        enemyBullets.clear();
         xpOrbs.clear();
+        deathAnimations.clear();
     }
 
     @Override

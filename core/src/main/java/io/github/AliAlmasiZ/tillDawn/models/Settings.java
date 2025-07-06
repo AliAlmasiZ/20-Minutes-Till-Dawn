@@ -25,7 +25,8 @@ public class Settings {
         musicVolume = prefs.getFloat(Fields.MUSIC_VOLUME.name(), 1f);
         autoReload = prefs.getBoolean(Fields.AUTO_RELOAD.name(), false);
         blackWhite = prefs.getBoolean(Fields.BLACK_N_WHITE.name(), false);
-        musicTrack = MusicTrack.valueOf(prefs.getString(Fields.MUSIC_TRACK.name(), MusicTrack.YOU_GO.name()));
+        musicTrack = MusicTrack.StrangerThings;
+//        musicTrack = MusicTrack.valueOf(prefs.getString(Fields.MUSIC_TRACK.name(), MusicTrack.StrangerThings.name()));
         savePrefs();
     }
 
