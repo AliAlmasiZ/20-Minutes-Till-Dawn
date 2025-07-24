@@ -22,6 +22,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.TimeUtils;
+import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.ScreenViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import io.github.AliAlmasiZ.tillDawn.Main;
@@ -184,7 +185,7 @@ public class GameScreen extends ScreenAdapter {
 
 //        viewport = new FitViewport(GAME_WORLD_WIDTH, GAME_WORLD_HEIGHT, camera);
         camera = new OrthographicCamera();
-        viewport = new ScreenViewport(camera);
+        viewport = new FitViewport(Gdx.graphics.getWidth(), Gdx.graphics.getHeight(), camera);
         camera.setToOrtho(false, GAME_WORLD_WIDTH, GAME_WORLD_HEIGHT);
         Gdx.input.setCursorCatched(false);
 
@@ -474,7 +475,7 @@ public class GameScreen extends ScreenAdapter {
         }
         if (canSpawnEyebats && TimeUtils.millis() - lastEyebatSpawnTime > eyebatSpawnRate) {
             for(int i = 0; i < MathUtils.floor((4 * gameTimer - MAX_GAME_TIME + 30) / 30); i++)
-                spawnNewEnemy(EnemyType.EYEBAT);
+                spawnNewEne my(EnemyType.EYEBAT);
             lastEyebatSpawnTime = TimeUtils.millis();
         }
 

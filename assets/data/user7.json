@@ -1,10 +1,10 @@
 {
   "id": 7,
-  "username": "Mamad",
-  "password": "Mamamad2@s",
-  "securityAnswer": "",
+  "username": "Ali23",
+  "password": "AliAli2@",
+  "securityAnswer": "aaa",
   "score": 0,
   "kill": 0,
-  "longestSurvivalTime": 0.0,
-  "avatarPath": "avatars/avatar2.png"
+  "longestSurvivalTime": 5.750313,
+  "avatarPath": "avatars/T_Dasher_Portrait.png"
 }

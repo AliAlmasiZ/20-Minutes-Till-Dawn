@@ -152,7 +152,7 @@ public class ScoreboardScreen extends ScreenAdapter {
             Label killsLabel = new Label(String.valueOf(user.getKill()), style);
             Label timeLabel = new Label(String.format("%02d:%02d", (int) (user.getLongestSurvivalTime() / 60), (int) (user.getLongestSurvivalTime() % 60)), style);
 
-            
+
             scoreboardTable.add(rankLabel).width(100);
             scoreboardTable.add(usernameLabel).expandX().fillX();
             scoreboardTable.add(scoreLabel).width(150);
